@@ -65,6 +65,7 @@ static char *dumpnr;
 static char *kernel;
 static char *remote;
 static char *vmcore;
+static char *command_file;
 
 /*
  * TODO:
@@ -87,7 +88,7 @@ usage(void)
 
 	fprintf(stderr,
 	    "usage: %s [-afqvw] [-b rate] [-d crashdir] [-c core | -n dumpnr | -r device]\n"
-	    "\t[kernel [core]]\n", getprogname());
+	    "\t[-x command_file] [kernel [core]]\n", getprogname());
 	exit(1);
 }
 
@@ -249,7 +250,7 @@ main(int argc, char *argv[])
 	args.argv = (char **)xmalloc(sizeof(char *));
 	args.argv[0] = argv[0];
 
-	while ((ch = getopt(argc, argv, "ab:c:d:fn:qr:vw")) != -1) {
+	while ((ch = getopt(argc, argv, "ab:c:d:fn:qr:vwx:")) != -1) {
 		switch (ch) {
 		case 'a':
 			annotation_level++;
@@ -302,6 +303,17 @@ main(int argc, char *argv[])
 			break;
 		case 'w':	/* core file is writeable. */
 			writeable = 1;
+			break;
+		case 'x':	/* use given command file. */
+			if (command_file != NULL) {
+				warnx("option %c: can only be specified once",
+				    optopt);
+				usage();
+				/* NOTREACHED */
+			}
+			command_file = strdup(optarg);
+			add_arg(&args, "-x");
+			add_arg(&args, command_file);
 			break;
 		case '?':
 		default:
