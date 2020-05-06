@@ -6280,5 +6280,379 @@ proc gdb_define_cmd {command command_list} {
     }
 }
 
+# Override the 'cd' builtin with a version that ensures that the
+# log file keeps pointing at the same file.  We need this because
+# unfortunately the path to the log file is recorded using an
+# relative path name, and, we sometimes need to close/reopen the log
+# after changing the current directory.  See get_compiler_info.
+
+rename cd builtin_cd
+
+proc cd { dir } {
+
+    # Get the existing log file flags.
+    set log_file_info [log_file -info]
+
+    # Split the flags into args and file name.
+    set log_file_flags ""
+    set log_file_file ""
+    foreach arg [ split "$log_file_info" " "] {
+	if [string match "-*" $arg] {
+	    lappend log_file_flags $arg
+	} else {
+	    lappend log_file_file $arg
+	}
+    }
+
+    # If there was an existing file, ensure it is an absolute path, and then
+    # reset logging.
+    if { $log_file_file != "" } {
+	set log_file_file [file normalize $log_file_file]
+	log_file
+	log_file $log_file_flags "$log_file_file"
+    }
+
+    # Call the builtin version of cd.
+    builtin_cd $dir
+}
+
+# Return a list of all languages supported by GDB, suitable for use in
+# 'set language NAME'.  This doesn't include either the 'local' or
+# 'auto' keywords.
+proc gdb_supported_languages {} {
+    return [list c objective-c c++ d go fortran modula-2 asm pascal \
+		opencl rust minimal ada]
+}
+
+# Check if debugging is enabled for gdb.
+
+proc gdb_debug_enabled { } {
+    global gdbdebug
+
+    # If not already read, get the debug setting from environment or board setting.
+    if {![info exists gdbdebug]} {
+	global env
+	if [info exists env(GDB_DEBUG)] {
+	    set gdbdebug $env(GDB_DEBUG)
+	} elseif [target_info exists gdb,debug] {
+	    set gdbdebug [target_info gdb,debug]
+	} else {
+	    return 0
+	}
+    }
+
+    # Ensure it not empty.
+    return [expr { $gdbdebug != "" }]
+}
+
+# Turn on debugging if enabled, or reset if already on.
+
+proc gdb_debug_init { } {
+
+    global gdb_prompt
+
+    if ![gdb_debug_enabled] {
+      return;
+    }
+
+    # First ensure logging is off.
+    send_gdb "set logging off\n"
+
+    set debugfile [standard_output_file gdb.debug]
+    send_gdb "set logging file $debugfile\n"
+
+    send_gdb "set logging debugredirect\n"
+
+    global gdbdebug
+    foreach entry [split $gdbdebug ,] {
+      send_gdb "set debug $entry 1\n"
+    }
+
+    # Now that everything is set, enable logging.
+    send_gdb "set logging on\n"
+    gdb_expect 10 {
+	-re "Copying output to $debugfile.*Redirecting debug output to $debugfile.*$gdb_prompt $" {}
+	timeout { warning "Couldn't set logging file" }
+    }
+}
+
+# Check if debugging is enabled for gdbserver.
+
+proc gdbserver_debug_enabled { } {
+    # Always disabled for GDB only setups.
+    return 0
+}
+
+# Open the file for logging gdb input
+
+proc gdb_stdin_log_init { } {
+    global in_file
+
+    if {[info exists in_file]} {
+      # Close existing file.
+      catch "close $in_file"
+    }
+
+    set logfile [standard_output_file_with_gdb_instance gdb.in]
+    set in_file [open $logfile w]
+}
+
+# Write to the file for logging gdb input.
+# TYPE can be one of the following:
+# "standard" : Default. Standard message written to the log
+# "answer" : Answer to a question (eg "Y"). Not written the log.
+# "optional" : Optional message. Not written to the log.
+
+proc gdb_stdin_log_write { message {type standard} } {
+
+    global in_file
+    if {![info exists in_file]} {
+      return
+    }
+
+    # Check message types.
+    switch -regexp -- $type {
+        "answer" {
+            return
+        }
+        "optional" {
+            return
+        }
+    }
+
+    #Write to the log
+    puts -nonewline $in_file "$message"
+}
+
+# Write the command line used to invocate gdb to the cmd file.
+
+proc gdb_write_cmd_file { cmdline } {
+    set logfile [standard_output_file_with_gdb_instance gdb.cmd]
+    set cmd_file [open $logfile w]
+    puts $cmd_file $cmdline
+    catch "close $cmd_file"
+}
+
+# Compare contents of FILE to string STR.  Pass with MSG if equal, otherwise
+# fail with MSG.
+
+proc cmp_file_string { file str msg } {
+    if { ![file exists $file]} {
+	fail "$msg"
+	return
+    }
+
+    set caught_error [catch {
+	set fp [open "$file" r]
+	set file_contents [read $fp]
+	close $fp
+    } error_message]
+    if { $caught_error } then {
+	error "$error_message"
+	fail "$msg"
+	return
+    }
+
+    if { $file_contents == $str } {
+	pass "$msg"
+    } else {
+	fail "$msg"
+    }
+}
+
+# Does the compiler support CTF debug output using '-gt' compiler
+# flag?  If not then we should skip these tests.
+
+gdb_caching_proc skip_ctf_tests {
+    return ![gdb_can_simple_compile ctfdebug {
+	int main () {
+	    return 0;
+	}
+    } executable "additional_flags=-gt"]
+}
+
+# Return 1 if compiler supports -gstatement-frontiers.  Otherwise,
+# return 0.
+
+gdb_caching_proc supports_statement_frontiers {
+    return [gdb_can_simple_compile supports_statement_frontiers {
+	int main () {
+	    return 0;
+	}
+    } executable "additional_flags=-gstatement-frontiers"]
+}
+
+# Return 1 if compiler supports -mmpx -fcheck-pointer-bounds.  Otherwise,
+# return 0.
+
+gdb_caching_proc supports_mpx_check_pointer_bounds {
+    set flags "additional_flags=-mmpx additional_flags=-fcheck-pointer-bounds"
+    return [gdb_can_simple_compile supports_mpx_check_pointer_bounds {
+	int main () {
+	    return 0;
+	}
+    } executable $flags]
+}
+
+# Return 1 if compiler supports -fcf-protection=.  Otherwise,
+# return 0.
+
+gdb_caching_proc supports_fcf_protection {
+    return [gdb_can_simple_compile supports_fcf_protection {
+	int main () {
+	    return 0;
+	}
+  } executable "additional_flags=-fcf-protection=full"]
+}
+
+# Return 1 if symbols were read in using -readnow.  Otherwise, return 0.
+
+proc readnow { } {
+    set cmd "maint print objfiles"
+    gdb_test_multiple $cmd "" {
+	-re -wrap "\r\n.gdb_index: faked for \"readnow\"\r\n.*" {
+	    return 1
+	}
+	-re -wrap "" {
+	    return 0
+	}
+    }
+
+    return 0
+}
+
+# Return 1 if partial symbols are available.  Otherwise, return 0.
+
+proc psymtabs_p {  } {
+    global gdb_prompt
+
+    set cmd "maint info psymtab"
+    gdb_test_multiple $cmd "" {
+	-re "$cmd\r\n$gdb_prompt $" {
+	    return 0
+	}
+	-re -wrap "" {
+	    return 1
+	}
+    }
+
+    return 0
+}
+
+# Verify that partial symtab expansion for $filename has state $readin.
+
+proc verify_psymtab_expanded { filename readin } {
+    global gdb_prompt
+
+    set cmd "maint info psymtab"
+    set test "$cmd: $filename: $readin"
+    set re [multi_line \
+		"  \{ psymtab \[^\r\n\]*$filename\[^\r\n\]*" \
+		"    readin $readin" \
+		".*"]
+
+    gdb_test_multiple $cmd $test {
+	-re "$cmd\r\n$gdb_prompt $" {
+	    unsupported $gdb_test_name
+	}
+	-re -wrap $re {
+	    pass $gdb_test_name
+	}
+    }
+}
+
+# Add a .gdb_index section to PROGRAM.
+# PROGRAM is assumed to be the output of standard_output_file.
+# Returns the 0 if there is a failure, otherwise 1.
+
+proc add_gdb_index { program } {
+    global srcdir GDB env BUILD_DATA_DIRECTORY
+    set contrib_dir "$srcdir/../contrib"
+    set env(GDB) "$GDB --data-directory=$BUILD_DATA_DIRECTORY"
+    set result [catch "exec $contrib_dir/gdb-add-index.sh $program" output]
+    if { $result != 0 } {
+	verbose -log "result is $result"
+	verbose -log "output is $output"
+	return 0
+    }
+
+    return 1
+}
+
+# Add a .gdb_index section to PROGRAM, unless it alread has an index
+# (.gdb_index/.debug_names).  Gdb doesn't support building an index from a
+# program already using one.  Return 1 if a .gdb_index was added, return 0
+# if it already contained an index, and -1 if an error occurred.
+
+proc ensure_gdb_index { binfile } {
+    set testfile [file tail $binfile]
+    set test "check if index present"
+    gdb_test_multiple "mt print objfiles ${testfile}" $test {
+	-re -wrap "gdb_index.*" {
+	    return 0
+	}
+	-re -wrap "debug_names.*" {
+	    return 0
+	}
+	-re -wrap "Psymtabs.*" {
+	    if { [add_gdb_index $binfile] != "1" } {
+		return -1
+	    }
+	    return 1
+	}
+    }
+    return -1
+}
+
+# Return 1 if executable contains .debug_types section.  Otherwise, return 0.
+
+proc debug_types { } {
+    global hex
+
+    set cmd "maint info sections"
+    gdb_test_multiple $cmd "" {
+	-re -wrap "at $hex: .debug_types.*" {
+	    return 1
+	}
+	-re -wrap "" {
+	    return 0
+	}
+    }
+
+    return 0
+}
+
+# Return the addresses in the line table for FILE for which is_stmt is true.
+
+proc is_stmt_addresses { file } {
+    global decimal
+    global hex
+
+    set is_stmt [list]
+
+    gdb_test_multiple "maint info line-table $file" "" {
+	-re "\r\n$decimal\[ \t\]+$decimal\[ \t\]+($hex)\[ \t\]+Y\[^\r\n\]*" {
+	    lappend is_stmt $expect_out(1,string)
+	    exp_continue
+	}
+	-re -wrap "" {
+	}
+    }
+
+    return $is_stmt
+}
+
+# Return 1 if hex number VAL is an element of HEXLIST.
+
+proc hex_in_list { val hexlist } {
+    # Normalize val by removing 0x prefix, and leading zeros.
+    set val [regsub ^0x $val ""]
+    set val [regsub ^0+ $val "0"]
+
+    set re 0x0*$val
+    set index [lsearch -regexp $hexlist $re]
+    return [expr $index != -1]
+}
+
 # Always load compatibility stuff.
 load_lib future.exp
