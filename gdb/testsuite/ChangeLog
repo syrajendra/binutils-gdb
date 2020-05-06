@@ -1,4 +1,9 @@
-2020-05-23  Joel Brobecker  <brobecker@adacore.com>
+2020-05-06  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.arch/amd64-prologue-skip-cf-protection.exp: New file.
+	* gdb.arch/amd64-prologue-skip-cf-protection.c: New file.
+
+2020-05-06  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/default.exp: Change expected value for $_gdb_minor to 2.
 
