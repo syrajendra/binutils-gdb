@@ -42,7 +42,7 @@ mi_gdb_file_cmd ${binfile}
 proc mi_gdbserver_run { } {
     mi_gdb_test "kill" ".*" ""
 
-    set res [gdbserver_spawn ""]
+    set res [_gdbserver_spawn ""]
     set protocol [lindex $res 0]
     set gdbport [lindex $res 1]
 

@@ -391,7 +391,7 @@ proc gdbserver_start { options arguments } {
 #
 # Returns the target protocol and socket to connect to.
 
-proc gdbserver_spawn { child_args } {
+proc _gdbserver_spawn { child_args } {
     set target_exec [gdbserver_download_current_prog]
 
     # Fire off the debug agent.  This flavour of gdbserver takes as
@@ -541,7 +541,7 @@ proc gdbserver_run { child_args } {
 	}
     }
 
-    if { [catch { gdbserver_spawn $child_args } res] == 1 } {
+    if { [catch { _gdbserver_spawn $child_args } res] == 1 } {
 	perror $res
 	return 2
     }

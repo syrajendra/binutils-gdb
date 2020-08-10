@@ -84,11 +84,11 @@ foreach nonstop { 0 1 } { with_test_prefix "non-stop $nonstop" {
     # argument here, instead of using gdb_load, because we don't want
     # to download the interpreter to the target (it's already there)
     # or to the test output directory.
-    set res [gdbserver_spawn "${interp_system} ${remote_binfile}"]
+    set res [_gdbserver_spawn "${interp_system} ${remote_binfile}"]
     set gdbserver_protocol [lindex $res 0]
     set gdbserver_gdbport [lindex $res 1]
 
-    # Load BINFILE after gdbserver_spawn (so that gdbserver executes ld.so)
+    # Load BINFILE after _gdbserver_spawn (so that gdbserver executes ld.so)
     # but before "target remote" below so that qSymbol data get already
     # initialized from BINFILE (and not from ld.so first needing a change to
     # BINFILE later).
