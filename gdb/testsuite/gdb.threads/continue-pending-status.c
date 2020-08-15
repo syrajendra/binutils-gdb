@@ -42,17 +42,14 @@ main (void)
   int i;
 
   pthread_barrier_init (&barrier, NULL, NUM_THREADS);
-
+  pthread_t threads[NUM_THREADS];
   for (i = 0; i < NUM_THREADS; i++)
-    {
-      pthread_t thread;
-      int res;
-
-      res = pthread_create (&thread, NULL,
-			    thread_function, NULL);
-      assert (res == 0);
-    }
-
-  sleep (300);
+  {
+    int res;
+    res = pthread_create (&threads[i], NULL, thread_function, NULL);
+    assert (res == 0);
+  }
+  for (i = 0; i < NUM_THREADS; i++)
+    pthread_join(threads[i], NULL);
   return 0;
 }
