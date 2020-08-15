@@ -41,7 +41,8 @@ gdb_test_no_output "set print sevenbit-strings"
 # See if the static multi-threaded program runs.
 
 runto_main
-gdb_test "break sem_post"
+set sem_post_location [gdb_get_line_number "break at sem_post" ${srcfile}]
+gdb_test "break ${sem_post_location}"
 set test "continue to main's call of sem_post"
 gdb_test_multiple "continue" "$test" {
     -re "Breakpoint .*, .*sem_post .*$gdb_prompt " {
