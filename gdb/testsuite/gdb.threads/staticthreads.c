@@ -72,7 +72,7 @@ main (int argc, char **argv)
   {
     pthread_t thread;
     pthread_create (&thread, &attr, thread_function, NULL);
-    sem_post (&semaphore);
+    sem_post (&semaphore); /* break at sem_post */
     pthread_join (thread, NULL);
   }
 
