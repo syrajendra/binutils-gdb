@@ -2022,7 +2022,9 @@ CORE_ADDR
 fbsd_get_thread_local_address (struct gdbarch *gdbarch, CORE_ADDR dtv_addr,
 			       CORE_ADDR lm_addr, CORE_ADDR offset)
 {
-  LONGEST tls_index = fbsd_get_tls_index (gdbarch, lm_addr);
+  LONGEST tls_index = 1;
+  if (lm_addr)
+    tls_index = fbsd_get_tls_index (gdbarch, lm_addr);
 
   gdb_byte buf[gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT];
   if (target_read_memory (dtv_addr, buf, sizeof buf) != 0)
