@@ -329,16 +329,21 @@ i386fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct regcache *regcache;
 
-  if (tdep->fsbase_regnum == -1)
-    error (_("Unable to fetch %%gsbase"));
-
+  if (tdep->fsbase_regnum == -1) {
+    /* error (_("Unable to fetch %%gsbase")); */
+    /* If default way fails use fallback approach to fetch TLS */
+    return fbsd_get_thread_local_address_fallback(gdbarch, ptid, lm_addr, offset);
+  }
   regcache = get_thread_arch_regcache (ptid, gdbarch);
 
   target_fetch_registers (regcache, tdep->fsbase_regnum + 1);
 
   ULONGEST gsbase;
-  if (regcache->cooked_read (tdep->fsbase_regnum + 1, &gsbase) != REG_VALID)
-    error (_("Unable to fetch %%gsbase"));
+  if ((regcache->cooked_read (tdep->fsbase_regnum + 1, &gsbase) != REG_VALID) || !lm_addr) {
+    /* error (_("Unable to fetch %%gsbase")); */
+    /* If default way fails use fallback approach to fetch TLS */
+    return fbsd_get_thread_local_address_fallback(gdbarch, ptid, lm_addr, offset);
+  }
 
   CORE_ADDR dtv_addr = gsbase + gdbarch_ptr_bit (gdbarch) / 8;
   return fbsd_get_thread_local_address (gdbarch, dtv_addr, lm_addr, offset);

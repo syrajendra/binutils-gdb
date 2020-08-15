@@ -71,4 +71,12 @@ extern CORE_ADDR fbsd_get_thread_local_address (struct gdbarch *gdbarch,
 						CORE_ADDR lm_addr,
 						CORE_ADDR offset);
 
+/* This function implements logic to read TLS variables with the help of
+   libthread_db extern variables */
+
+extern CORE_ADDR fbsd_get_thread_local_address_fallback (struct gdbarch *gdbarch,
+						ptid_t ptid,
+						CORE_ADDR lm_addr,
+						CORE_ADDR offset);
+
 #endif /* fbsd-tdep.h */
