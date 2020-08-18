@@ -22,7 +22,12 @@ if [build_executable "failed to prepare for dprintf with non-stop" \
 }
 
 save_vars { GDBFLAGS } {
-    append GDBFLAGS " -ex \"set non-stop on\""
+    if { [istarget *-*-freebsd*] } {
+        # freebsd does not support non stop mode
+        append GDBFLAGS " -ex \"set non-stop off\""
+    } else {
+        append GDBFLAGS " -ex \"set non-stop on\""
+    }
     clean_restart ${executable}
 }
 
@@ -33,6 +38,7 @@ if ![runto main] {
 
 gdb_test "dprintf foo,\"At foo entry\\n\"" "Dprintf .*"
 
+# freebsd does not support non stop mode
 gdb_test "continue &" "Continuing\\."
 
 # Wait for the dprintf to trigger.
@@ -60,5 +66,8 @@ set test "inferior stopped"
 gdb_test_multiple "" $test {
     -re "Program stopped\\\.\r\n" {
 	pass $test
+    }
+    -re "Program received signal SIGINT.*" {
+    unsupported "$test"
     }
 }
