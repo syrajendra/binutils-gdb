@@ -26,10 +26,12 @@
 void *
 thread_function (void *arg)
 {
+#ifndef __FreeBSD__
   int x = * (int *) arg;
-
   printf ("Thread <%d> executing\n", x);
-
+#else
+  puts ("Thread executing");
+#endif
   return NULL;
 }
 
