@@ -1350,7 +1350,8 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  && (cust == NULL
 	      || COMPUNIT_PRODUCER (cust) == NULL
 	      || startswith (COMPUNIT_PRODUCER (cust), "GNU ")
-	      || startswith (COMPUNIT_PRODUCER (cust), "clang ")))
+	      || startswith (COMPUNIT_PRODUCER (cust), "clang ")
+        || startswith (COMPUNIT_PRODUCER (cust), "Juniper clang ")))
 	return post_prologue_pc;
 
       if (post_prologue_pc != 0)

@@ -1850,7 +1850,8 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
       if (post_prologue_pc
 	  && (cust != NULL
 	      && COMPUNIT_PRODUCER (cust) != NULL
-	      && startswith (COMPUNIT_PRODUCER (cust), "clang ")))
+	      && (startswith (COMPUNIT_PRODUCER (cust), "clang ")
+            || startswith (COMPUNIT_PRODUCER (cust), "Juniper clang "))))
         return std::max (start_pc, post_prologue_pc);
     }
  
