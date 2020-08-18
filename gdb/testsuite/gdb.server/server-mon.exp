@@ -39,6 +39,9 @@ gdb_test_multiple "monitor help" "monitor help" {
     -re "Unknown monitor command.*$gdb_prompt $" {
 	fail "monitor help"
     }
+    -re "Target does not support this command.*$gdb_prompt $" {
+    return 0
+    }
     -re "The following monitor commands.*$gdb_prompt $" {
 	pass "monitor help"
     }
