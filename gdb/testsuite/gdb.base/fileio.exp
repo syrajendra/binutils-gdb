@@ -15,7 +15,7 @@
 
 # This file was written by Corinna Vinschen <vinschen@redhat.com>
 
-if [target_info exists gdb,nofileio] {
+if { [target_info exists gdb,nofileio] || [target_info gdb_protocol] == "remote" } {
     verbose "Skipping fileio.exp because of no fileio capabilities."
     continue
 }
