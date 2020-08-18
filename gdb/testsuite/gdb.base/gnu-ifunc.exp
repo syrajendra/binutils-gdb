@@ -265,7 +265,9 @@ proc misc_tests {resolver_attr resolver_debug final_debug} {
 	}
     }
 
-    gdb_test "p/x resolver_hwcap" "= $actual_hwcap" "resolver received HWCAP"
+	if {[string compare "$actual_hwcap" "0x0"] != 0} {
+		gdb_test "p/x resolver_hwcap" "= $actual_hwcap" "resolver received HWCAP"
+	}
 
     # Test GDB will skip the gnu_ifunc resolver on first call.
 
