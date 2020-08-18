@@ -154,7 +154,7 @@ if {!$skip_float_test && \
 #step
 set stop_line [gdb_get_line_number "-step1-"]
 gdb_test "step" \
-    "print_all_arrays \\(array_i=<integer_array.*>, array_c=<char_array.*> .ZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZa., array_f=<float_array.*>, array_d=<double_array.*>\\) at .*$srcfile:$stop_line\[ \t\r\n\]+$stop_line.*print_int_array\\(array_i\\);.*" \
+    "print_all_arrays \\(array_i=.*,.*array_c=.*ZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZa., array_f=.*, array_d=.*\\) at .*$srcfile:$stop_line\[ \t\r\n\]+$stop_line.*print_int_array\\(array_i\\);.*" \
     "step inside print_all_arrays"
 
 #step -over
