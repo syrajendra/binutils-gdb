@@ -2035,7 +2035,7 @@ i386_frame_cache_1 (struct frame_info *this_frame,
 	  cache->saved_regs[I386_EIP_REGNUM] -= cache->base;
 	}
       else if (cache->pc != 0
-	       || target_read_code (get_frame_pc (this_frame), buf, 1))
+	       && target_read_code (get_frame_pc (this_frame), buf, 1))
 	{
 	  /* We're in a known function, but did not find a frame
 	     setup.  Assume that the function does not use %ebp.
