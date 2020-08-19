@@ -13,6 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+if { [test_compiler_info clang*] } {
+    unsupported "clang doesn't support -mfunction-return=thunk option"
+    return -1
+}
+
 standard_testfile
 
 set cflags "-mindirect-branch=thunk -mfunction-return=thunk"
