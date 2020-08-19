@@ -88,7 +88,10 @@ proc hook_stop_kill {} {
 	gdb_test_multiple "continue" "$test" {
 	    -re "Continuing.\r\n\\\[Inferior $decimal \\(.*\\) killed\\\]\r\n${gdb_prompt} $" {
 		pass $test
-	    }
+		}
+		-re "Continuing.\r\n.*\r\nRemote connection closed\r\n${gdb_prompt} $" {
+			pass $test
+		}
 	}
 
 	gdb_test "info threads" "No threads.*"
