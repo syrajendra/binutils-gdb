@@ -39,7 +39,10 @@ if { ([test_compiler_info {gcc-[0-5]-*}] || ![test_compiler_info gcc*]) } {
   setup_xfail "*-*-*"
 }
 gdb_test "x/x &o.v" "0x04000000"
-gdb_test "x/xh &o.w" "0x0300"
-
+if { [istarget "*-*-*freebsd*"] } {
+  gdb_test "x/xh &o.w" "0x0003"
+} else {
+  gdb_test "x/xh &o.w" "0x0300"
+}
 gdb_test "print o" "= {v = 4, w = 3, x = 2, f = 1.5, cplx = 1.25 \\+ 7.25 \\* I, d = -23.125}" \
     "print o after assignment"
