@@ -19,6 +19,11 @@
 # Test nested functions related functionality.
 #
 
+if { [test_compiler_info clang*] } {
+    unsupported "clang doesn't support nested functions"
+    return -1
+}
+
 standard_testfile
 
 
