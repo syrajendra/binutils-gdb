@@ -81,6 +81,12 @@ proc check_info_shared { test expect1 expect2 } {
 if ![runto_main] {
     return 0
 }
+
+if { [target_info gdb_protocol] == "remote" } {
+	set outdir [file dirname $binfile_lib1]
+	gdb_test_no_output "set solib-search-path ${outdir}"
+}
+
 check_info_shared "info sharedlibrary #1" 0 0
 
 # Set up breakpoints.
