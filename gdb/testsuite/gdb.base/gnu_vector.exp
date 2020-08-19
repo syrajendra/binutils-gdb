@@ -205,7 +205,7 @@ gdb_test "whatis struct_with_vector_1" {type = struct {...}}
 
 # Test inferior function calls with vector arguments and/or vector
 # return values.
-if { [istarget "i?86-*-*"] || [istarget "x86_64-*-*" ] } {
+if { [istarget "i?86-*-*"] || [istarget "x86_64-*-*" ] || [target_info gdb_protocol] == "remote" } {
     # These platforms don't support infcalls with vector arguments
     # and/or vector return values, so skip the remaining tests.
     # See also PR exp/18537.
