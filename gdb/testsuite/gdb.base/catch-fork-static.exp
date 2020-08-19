@@ -23,6 +23,12 @@
 
 # Until "catch fork" is implemented on other targets...
 #
+
+if { [istarget "*-*-*freebsd*"] && [target_info gdb_protocol] == "remote" } {
+    unsupported "freebsd remote setup doesn't support catchpoints"
+    return -1
+}
+
 if { ![istarget "*-*-linux*"] && ![istarget "*-*-openbsd*"] } then {
     continue
 }

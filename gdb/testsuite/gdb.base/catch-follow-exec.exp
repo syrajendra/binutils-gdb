@@ -15,6 +15,11 @@
 
 # Test whether info prog crashes gdb at a catch point in follow-exec-mode new.
 
+if { [istarget "*-*-*freebsd*"] && [target_info gdb_protocol] == "remote" } {
+    unsupported "freebsd remote setup doesn't support catchpoints"
+    return -1
+}
+
 standard_testfile
 
 if { ![remote_file target exists /bin/ls] } {
