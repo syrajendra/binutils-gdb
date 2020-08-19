@@ -31,10 +31,15 @@ gdb_test "p z1" " = 1.5 \\+ 4.5 \\* I"
 gdb_test "p z2" " = 2.5 \\+ -5.5 \\* I"
 gdb_test "p z3" " = 3.5 \\+ 6.5 \\* I"
 
-gdb_test "ptype z1" " = complex double"
-gdb_test "ptype z2" " = complex float"
-gdb_test "ptype z3" " = complex long double"
-
+if { [istarget "*-*-*freebsd*"] } {
+    gdb_test "ptype z1" " = complex"
+    gdb_test "ptype z2" " = complex"
+    gdb_test "ptype z3" " = complex"
+} else {
+   gdb_test "ptype z1" " = complex double"
+   gdb_test "ptype z2" " = complex float"
+   gdb_test "ptype z3" " = complex long double"
+}
 gdb_test "p \$_cimag (z1)" " = 4.5"
 gdb_test "ptype \$" " = double"
 
