@@ -15,6 +15,11 @@
 
 # Test the compare-sections command.
 
+if { [istarget "*-*-*freebsd*"] && [target_info gdb_protocol] == "remote" } {
+    unsupported "freebsd remote setup doesn't support compare sections"
+    return -1
+}
+
 standard_testfile
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug}]} {
