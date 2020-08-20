@@ -25,7 +25,11 @@
 
 static void __attribute__ ((used)) ambiguous_fun (void) {}
 
+#ifdef __clang__
+static int __attribute__((used)) ambiguous_var;
+#else
 static int ambiguous_var;
+#endif
 
 
 
