@@ -277,7 +277,11 @@ gdb_test_no_output "set history size 100" "set history size 100"
 #test show history size 100
 gdb_test "show history size" "The size of the command history is 100..*" "show history size (100)" 
 #test set language asm
-gdb_test_no_output "set language asm"
+if { [target_info gdb_protocol] == "remote" } {
+    gdb_test "set language asm" "Warning: the current language does not match this frame."
+} else {
+    gdb_test_no_output "set language asm"
+}
 #test show language asm
 gdb_test "show language" "The current source language is \"asm\"..*" "show language (asm)" 
 #test set language rust, with a trailing space
