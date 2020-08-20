@@ -57,6 +57,14 @@ gdb_test "ptype /o struct abc" \
 "                           /* total size (bytes):   56 */" \
 "                         \}"]]
 
+if { [test_compiler_info clang-*] } {
+    set line1 "                           virtual ~abc(void);"
+    set line2 "                           abc(void);"
+} else {
+    set line1 "                           abc(void);"
+    set line2 "                           ~abc();"
+}
+
 # Test "ptype /oTM".
 gdb_test "ptype /oTM struct abc" \
     [string_to_regexp [multi_line \
@@ -78,8 +86,8 @@ gdb_test "ptype /oTM struct abc" \
 "                           \} field8;" \
 "/*   48      |     2 */    my_int_type field9;" \
 "" \
-"                           abc(void);" \
-"                           ~abc();" \
+$line1 \
+$line2 \
 "" \
 "                           typedef short my_int_type;" \
 "/* XXX  6-byte padding  */" \
