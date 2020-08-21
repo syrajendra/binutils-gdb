@@ -40,7 +40,11 @@ if { $size < 10 } {
 clean_restart ${binfile}
 
 set prev_timeout $timeout
-set timeout 30
+if { [target_info gdb_protocol] == "remote" } {
+    set timeout 60
+} else {
+    set timeout 30
+}
 
 if { ! [ runto_main ] } then {
     untested "couldn't run to main"
