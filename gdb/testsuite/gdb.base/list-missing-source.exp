@@ -49,6 +49,13 @@ if ![runto_main] then {
     return 0
 }
 
+if { [target_info gdb_protocol] == "remote" } {
+	set index1 [string first "outputs/" $srcfile]
+	set index2 [string length $srcfile]
+	set newsrcfile [string range $srcfile $index1 $index2]
+	set srcfile $newsrcfile
+}
+
 gdb_test "list" "1\[ \t\]+in\[ \t\]+$srcfile"
 
 gdb_test "info source" \
