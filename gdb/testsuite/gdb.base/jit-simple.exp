@@ -98,6 +98,11 @@ proc jit_test_reread {standalone change_addr} {
 	    clean_restart $binfile_dl
 	}
 
+	if { [target_info gdb_protocol] == "remote" } {
+		set outdir [file dirname $binfile_dl]
+		gdb_test_no_output "set solib-search-path ${outdir}"
+	}
+
 	runto_main
 
 	set addr_before [get_hexadecimal_valueof "&__jit_debug_descriptor" 0 \
