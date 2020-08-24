@@ -24,6 +24,10 @@ if { [info proc gdb_reconnect] == "" } {
     return 0
 }
 
+if { [istarget "*-*-*freebsd*"] && [target_info gdb_protocol] == "remote" } {
+    return 0
+}
+
 set testfile solib-disc
 set libfile so-disc-shr
 set srcfile ${testfile}.c
