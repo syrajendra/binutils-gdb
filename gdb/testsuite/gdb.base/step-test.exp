@@ -157,7 +157,7 @@ gdb_test_multiple "finish" "$test" {
 	# On IA-64, we end up on callee instead of on the following line due
 	# to the restoration of the global pointer.
 	# Similarly on MIPS PIC targets.
-	if { [istarget "ia64-*-*"] || [istarget "mips*-*-*"] } {
+	if { [istarget "ia64-*-*"] || [istarget "mips*-*-*"] || [test_compiler_info clang-*] } {
 	    test_i "$test" "stepi" \
 		".*${decimal}.*callee.*STEPI"  ".*${decimal}.*callee.*NEXTI"
 	} else {
