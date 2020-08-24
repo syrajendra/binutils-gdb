@@ -80,6 +80,11 @@ if ![runto_main] then {
     return
 }
 
+if { [target_info gdb_protocol] == "remote" } {
+	set outdir [file dirname $lib_so]
+	gdb_test_no_output "set solib-search-path ${outdir}"
+}
+
 # 1) Run to gdb_add_symbol_file in $srcfile for adding the library's
 #    symbols.
 gdb_breakpoint gdb_add_symbol_file
