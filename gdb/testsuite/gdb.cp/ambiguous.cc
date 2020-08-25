@@ -6,80 +6,80 @@ void marker1()
 
 class A1 {
 public:
-  int x;
-  int y;
+  int x{};
+  int y{};
 };
 
 class A2 {
 public:
-  int x;
-  int y;
+  int x{};
+  int y{};
 };
 
 class A3 {
 public:
-  int x;
-  int y;
+  int x{};
+  int y{};
 };
 
 class X : public A1, public A2 {
 public:
-  int z;
+  int z{};
 };
 
 class L : public A1 {
 public:
-  int z;
+  int z{};
 };
 
 class LV : public virtual A1 {
 public:
-  int z;
+  int z{};
 };
 
 class M : public A2 {
 public:
-  int w;
+  int w{};
 };
 
 class N : public L, public M {
 public:
-  int r;
+  int r{};
 };
 
 class K : public A1 {
 public:
-  int i;
+  int i{};
 };
 
 class KV : public virtual A1 {
 public:
-  int i;
+  int i{};
 };
 
 class J : public K, public L {
 public:
-  int j;
+  int j{};
 };
 
 class JV : public KV, public LV {
 public:
-  int jv;
+  int jv{};
 };
 
 class JVA1 : public KV, public LV, public A1 {
 public:
-  int jva1;
+  int jva1{};
 };
 
 class JVA2 : public KV, public LV, public A2 {
 public:
-  int jva2;
+  int jva2{};
 };
 
 class JVA1V : public KV, public LV, public virtual A1 {
 public:
-  int jva1v;
+  int jva1v{};
 };
 
 int main()

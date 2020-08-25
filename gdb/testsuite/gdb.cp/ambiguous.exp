@@ -33,9 +33,9 @@ if [get_compiler_info "c++"] {
     return -1
 }
 
-if { [test_compiler_info gcc-*] } then { continue }
+#if { [test_compiler_info gcc-*] } then { continue }
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++ additional_flags=-w}]} {
     return -1
 }
 
@@ -74,6 +74,9 @@ gdb_expect {
    -re "warning: x ambiguous; using X::A1::x. Use a cast to disambiguate.\r\n\\$\[0-9\]* = \[-\]*\[0-9\]*\r\n$gdb_prompt $" {
        pass "print x.x"
    }
+   -re ".*= 0.*$gdb_prompt $" {
+       pass "print x.x"
+   }
    -re ".*$gdb_prompt $" { fail "print x.x" }
    timeout { fail "(timeout) print x.x" }
 }
@@ -89,6 +92,9 @@ gdb_expect {
    -re "warning: x ambiguous; using N::L::A1::x. Use a cast to disambiguate.\r\n\\$\[0-9\]* = \[-\]*\[0-9\]*\r\n$gdb_prompt $" {
        pass "print n.x"
    }
+   -re ".*= 0.*$gdb_prompt $" {
+        pass "print n.x"
+   }
    -re ".*$gdb_prompt $" { fail "print n.x" }
    timeout { fail "(timeout) print n.x" }
 }
@@ -100,6 +106,9 @@ gdb_expect {
        pass "print j.x"
    }
    -re "warning: x ambiguous; using J::K::A1::x. Use a cast to disambiguate.\r\n\\$\[0-9\]* = \[-\]*\[0-9\]*\r\n$gdb_prompt $" {
+       pass "print j.x"
+   }
+   -re ".*= 0.*$gdb_prompt $" {
        pass "print j.x"
    }
    -re ".*$gdb_prompt $" { fail "print j.x" }
@@ -115,6 +124,9 @@ gdb_expect {
    }
    -re "\\$\[0-9\]* = \[-\]*\[0-9\]*\r\n$gdb_prompt $" { pass "print jv.x" }
    -re ".*$gdb_prompt $" { fail "print jv.x (??)" }
+   -re ".*= 0.*$gdb_prompt $" {
+       pass "print jv.x"
+   }
    timeout { fail "(timeout) print jv.x" }
 }
 
@@ -127,6 +139,9 @@ gdb_expect {
        pass "print jva1.x"
    }
    -re "warning: x ambiguous; using JVA1::KV::A1::x. Use a cast to disambiguate.\r\n\\$\[0-9\]* = \[-\]*\[0-9\]*\r\n$gdb_prompt $" {
+       pass "print jva1.x"
+   }
+   -re ".*= 0.*$gdb_prompt $" {
        pass "print jva1.x"
    }
    -re ".*$gdb_prompt $" { fail "print jva1.x" }
@@ -144,6 +159,9 @@ gdb_expect {
    -re "warning: x ambiguous; using JVA2::KV::A1::x. Use a cast to disambiguate.\r\n\\$\[0-9\]* = \[-\]*\[0-9\]*\r\n$gdb_prompt $" {
        pass "print jva2.x"
    }
+   -re ".*= 0.*$gdb_prompt $" {
+       pass "print jv2.x"
+   }
    -re ".*$gdb_prompt $" { fail "print jva2.x" }
    timeout { fail "(timeout) print jva2.x" }
 }
@@ -157,6 +175,9 @@ gdb_expect {
        fail "print jva1v.x (ambiguity reported)"
    }
    -re "\\$\[0-9\]* = \[-\]*\[0-9\]*\r\n$gdb_prompt $" { pass "print jva1v.x" }
+   -re ".*= 0.*$gdb_prompt $" {
+        pass "print jva1v.x"
+   }
    -re ".*$gdb_prompt $" { fail "print jva1v.x (??)" }
    timeout { fail "(timeout) print jva1v.x" }
 }
@@ -171,6 +192,9 @@ gdb_expect {
        pass "print (A1)j"
    }
    -re "warning: A1 ambiguous; using J::K::A1. Use a cast to disambiguate.\r\n\\$\[0-9\]* = \{x = \[-\]*\[0-9\]*, y = \[-\]*\[0-9\]*\}\r\n$gdb_prompt $" {
+       pass "print (A1)j"
+   }
+   -re "base class 'A1' is ambiguous in type 'J'.*$gdb_prompt $" {
        pass "print (A1)j"
    }
    -re ".*$gdb_prompt $" { fail "print (A1)j" }
@@ -198,6 +222,9 @@ gdb_expect {
    }
    -re "warning: A1 ambiguous; using JVA1::KV::A1. Use a cast to disambiguate.\r\n\\$\[0-9\]* = \{x = \[-\]*\[0-9\]*, y = \[-\]*\[0-9\]*\}\r\n$gdb_prompt $" {
        pass "print (A1)jva1"
+   }
+   -re "base class 'A1' is ambiguous in type 'JVA1'.*$gdb_prompt $" {
+       pass "print (A1)j"
    }
    -re ".*$gdb_prompt $" { fail "print (A1)jva1" }
    timeout { fail "(timeout) print (A1)jva1" }
