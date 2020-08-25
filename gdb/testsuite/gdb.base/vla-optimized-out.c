@@ -20,9 +20,17 @@
 
 int
 #ifdef NOCLONE
+#ifdef __clang__
+__attribute__((noinline, optnone))
+#else
 __attribute__((noinline, noclone))
+#endif
+#else
+#ifdef __clang__
+__attribute__((noinline, optnone))
 #else
 __attribute__((noinline))
+#endif
 #endif
 f1 (int i)
 {

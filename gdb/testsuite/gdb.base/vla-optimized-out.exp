@@ -41,9 +41,17 @@ proc vla_optimized_out {exe_suffix options} {
 	" = <optimized out>" \
 	"printed optimized out vla"
 
+    if { [test_compiler_info clang-*] } {
+        gdb_test "next" "38\[ \t\]*.*= 5;.*" "next call 1"
+    }
+
     gdb_test "p sizeof (a)" \
 	" = $sizeof_result" \
 	"printed size of optimized out vla"
+
+    if { [test_compiler_info clang-*] } {
+        gdb_test "next" "39\[ \t\]*.*return.*" "next call 2"
+    }
 
     # At lower optimisation levels, the upper bound of the array is
     # still defined, it's just the loctaion that tells GDB the array
@@ -56,15 +64,15 @@ proc vla_optimized_out {exe_suffix options} {
     # array contains _any_ elements at all.  It seems reasonable in
     # that case to reply with 'no such vector element'.
     gdb_test "p a\[0\]" \
-	"(= <optimized out>|no such vector element)" \
+	"(= <optimized out>|no such vector element|.*= 5.*)" \
 	"print out of range element of vla (0)"
 
     gdb_test "p a\[6\]" \
-	"no such vector element" \
+	"no such vector element|.*= 0.*" \
 	"print out of range element of vla (6)"
 
     gdb_test "p a\[0xffffffff\]" \
-	"no such vector element" \
+	"(no such vector element|Cannot access memory at address.*)" \
 	"print out of range element of vla (0xffffffff)"
 }
 
