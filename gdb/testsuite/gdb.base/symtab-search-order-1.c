@@ -15,4 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifdef __clang__
+static int static_global __attribute__((used)) = 23;
+#else
 static int static_global = 23;
+#endif
