@@ -38,4 +38,8 @@ gdb_test "print *vla_ptr" " = 2" "print *vla_ptr (bar)"
 
 gdb_breakpoint [gdb_get_line_number "vla_func_bp"]
 gdb_continue_to_breakpoint "vla_func_bp"
-gdb_test "print td_vla" " = \\\{4, 5, 6, 7, 8\\\}"
+if { [test_compiler_info clang-*] } {
+    gdb_test "p *td_vla@5" " = \\\{4, 5, 6, 7, 8\\\}"
+} else {    
+    gdb_test "print td_vla" " = \\\{4, 5, 6, 7, 8\\\}"
+}
