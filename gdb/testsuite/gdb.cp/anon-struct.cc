@@ -21,11 +21,21 @@ public:
   ~C() {}
 };
 
+#ifdef __clang__
+struct t {
+  t() {}
+  ~t() {}
+  C m;
+};
+typedef struct t t_t;
+t_t v;
+#else
 typedef struct {
   C m;
 } t;
 
 t v;
+#endif
 
 namespace X {
   class C2 {
@@ -33,11 +43,21 @@ namespace X {
     C2() {}
   };
 
+#ifdef __clang__
+  struct t2 {
+    t2() {}
+    ~t2() {}
+    C2 m;
+  };
+  typedef struct t2 t2_t;
+  t2_t v2;
+#else
   typedef struct {
     C2 m;
   } t2;
 
   t2 v2;
+#endif
 }
 
 template<class T>
@@ -46,12 +66,22 @@ public:
   ~C3() {}
 };
 
+#ifdef __clang__
+struct t3 {
+  t3() {}
+  ~t3() {}
+  C3<int> m;
+} ;
+typedef struct t3 t3_t;
+t3_t v3;
+#else
 typedef struct {
   C3<int> m;
 } t3;
 
 t3 v3;
 
+#endif
 int main()
 {
 }

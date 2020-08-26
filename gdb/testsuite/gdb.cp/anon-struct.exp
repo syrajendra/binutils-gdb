@@ -28,8 +28,13 @@ if { [is_aarch32_target] } {
 	"print type of t::t"
 }
 
-gdb_test "ptype X::t2" "type = struct X::t2 {\[\r\n \]*X::C2 m;\[\r\n \]*}" \
-    "print type of X::t2"
+if { [test_compiler_info clang-*] } {
+    gdb_test "ptype X::t2" "type = struct X::t2 {\[\r\n \]*X::C2 m;\[\r\n \]*.*}" \
+       "print type of t"
+} else {
+    gdb_test "ptype X::t2" "type = struct X::t2 {\[\r\n \]*X::C2 m;\[\r\n \]*}" \
+        "print type of X::t2"
+}
 
 if { [is_aarch32_target] } {
     gdb_test "ptype X::t2::t2" "type = struct X::t2 {\r\n    X::C2 m;\r\n} \\*\\(X::t2 \\* const\\)" \
