@@ -393,6 +393,10 @@ main(int argc, char *argv[])
 	add_arg(&args, "-iex");
 	add_arg(&args, "set osabi FreeBSD/kernel");
 
+	/* Change default remote timeout for junos live debugging. */
+	add_arg(&args, "-iex");
+	add_arg(&args, "set remotetimeout 5");
+
 	/* Open the vmcore if requested. */
 	if (vmcore != NULL) {
 		add_arg(&args, "-ex");
