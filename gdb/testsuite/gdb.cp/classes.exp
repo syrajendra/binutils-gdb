@@ -318,7 +318,7 @@ proc test_ptype_class_objects {} {
 	}
 
     # Classes with typedefs of different access.
-
+	if { [test_compiler_info gcc-*] } {
     cp_test_ptype_class \
 	"class class_with_typedefs" "" "class" "class_with_typedefs" \
 	{
@@ -367,7 +367,7 @@ proc test_ptype_class_objects {} {
 	    { field private "struct_with_private_typedef::INT b;" }
 	    { typedef private "typedef int INT;" }
 	}
-
+	}
     # For the following two cases, we cannot use cp_test_ptype_class.
     # We need to explicitly check whether the access label was suppressed.
     set ws {[ \t\r\n]*}
