@@ -231,6 +231,10 @@ arm_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, arm_fbsd_iterate_over_regset_sections);
   set_gdbarch_core_read_description (gdbarch, arm_fbsd_core_read_description);
 
+  /* Enable TLS support.  */
+  set_gdbarch_fetch_tls_load_module_address (gdbarch,
+                                             svr4_fetch_objfile_link_map);
+
   /* Single stepping.  */
   set_gdbarch_software_single_step (gdbarch, arm_software_single_step);
 }
