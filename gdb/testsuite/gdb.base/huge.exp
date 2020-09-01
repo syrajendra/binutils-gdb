@@ -41,7 +41,7 @@ clean_restart ${binfile}
 
 set prev_timeout $timeout
 if { [target_info gdb_protocol] == "remote" } {
-    set timeout 60
+    set timeout 120
 } else {
     set timeout 30
 }
