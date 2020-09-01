@@ -5405,7 +5405,7 @@ static const struct protocol_feature remote_protocol_features[] = {
     PACKET_exec_event_feature },
   { "Qbtrace-conf:pt:size", PACKET_DISABLE, remote_supported_packet,
     PACKET_Qbtrace_conf_pt_size },
-  { "vContSupported", PACKET_DISABLE, remote_supported_packet, PACKET_vContSupported },
+  { "vContSupported", PACKET_ENABLE, remote_supported_packet, PACKET_vContSupported },
   { "QThreadEvents", PACKET_DISABLE, remote_supported_packet, PACKET_QThreadEvents },
   { "no-resumed", PACKET_DISABLE, remote_supported_packet, PACKET_no_resumed },
   { "memory-tagging", PACKET_DISABLE, remote_supported_packet,

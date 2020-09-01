@@ -6349,6 +6349,10 @@ arm_software_single_step (struct regcache *regcache)
   struct gdbarch *gdbarch = regcache->arch ();
   struct arm_get_next_pcs next_pcs_ctx;
 
+  /* Check if the target supports hardware single step */
+  if (target_can_do_single_step () == 1)
+    return {};
+
   arm_get_next_pcs_ctor (&next_pcs_ctx,
 			 &arm_get_next_pcs_ops,
 			 gdbarch_byte_order (gdbarch),
