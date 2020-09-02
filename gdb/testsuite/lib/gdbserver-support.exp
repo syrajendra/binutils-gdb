@@ -47,6 +47,8 @@
 # If specified, then ADDITIONAL_TEXT must match the text that comes after
 # the connection message in order for the procedure to succeed.
 #
+global remote_gdbserver_command
+
 proc gdb_target_cmd_ext { targetname serialport {additional_text ""} } {
     global gdb_prompt
 
@@ -343,6 +345,8 @@ proc gdbserver_start { options arguments } {
 
 	global server_spawn_id
 	set server_spawn_id [remote_spawn target $gdbserver_command]
+	global remote_gdbserver_command
+	set remote_gdbserver_command $gdbserver_command
 
 	# GDBserver doesn't do inferior I/O through GDB.  But we can
 	# talk to the program using GDBserver's tty instead.
@@ -407,9 +411,16 @@ proc close_gdbserver {} {
 
     if {![info exists server_spawn_id]} {
 	return
-    }
+	}
 
-    verbose "Quitting GDBserver"
+	global remote_gdbserver_command
+	if { [info exists ::env(BOARD_NAME)] } {
+		set board_name $::env(BOARD_NAME)
+		set cmd "ssh ${board_name} \"ps -aux | grep '$remote_gdbserver_command' | grep -v grep | awk '{print \\\$2}'| xargs kill -9\""
+		eval exec $cmd
+	}
+
+	verbose "Quitting GDBserver"
 
     catch "close -i $server_spawn_id"
     catch "wait -i $server_spawn_id"
