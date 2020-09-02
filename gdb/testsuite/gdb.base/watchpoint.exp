@@ -15,6 +15,9 @@
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
 
 standard_testfile
 

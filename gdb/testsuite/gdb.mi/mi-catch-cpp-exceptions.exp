@@ -15,6 +15,10 @@
 
 # Test the -catch-throw, -catch-rethrow, and -catch-catch MI commands.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 if { [skip_cplus_tests] } { continue }
 
 load_lib mi-support.exp

@@ -28,6 +28,10 @@
 # instruction.  Since the kernel problems can be "fixed" using
 # software single-step this is KFAILed rather than XFAILed.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 if [target_info exists gdb,nosignals] {
     verbose "Skipping sigbpt.exp because of nosignals."
     continue

@@ -20,6 +20,10 @@
 # check whether the built-ins are disabled (gdb uses the typedefs in
 # the debug info instead.)
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 # Test char16_t/char32_t/wchar_t in language LANG, against symbols in

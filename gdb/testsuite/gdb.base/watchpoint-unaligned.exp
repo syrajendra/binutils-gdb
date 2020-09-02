@@ -17,6 +17,10 @@
 
 # Test inserting read watchpoints on unaligned addresses.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 if {[skip_hw_watchpoint_tests]} {
     return 0
 }

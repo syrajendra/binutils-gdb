@@ -16,6 +16,10 @@
 # Test running a program that spawns enough threads that the tid of an
 # exited thread is reused.  GDB should not crash when this happens.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile { debug pthreads }] == -1} {

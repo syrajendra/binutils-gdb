@@ -16,6 +16,10 @@
 # This file was written by Justin Lebar. (justin.lebar@gmail.com)
 # And further hacked on by Doug Evans. (dje@google.com)
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 load_lib completion-support.exp
 
 standard_testfile

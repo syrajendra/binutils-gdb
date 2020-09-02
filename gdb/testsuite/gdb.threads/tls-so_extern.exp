@@ -16,6 +16,10 @@
 # tls-so_extern.exp -- Expect script to test thread local storage in gdb, with
 # a variable defined in a shared library.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile tls-so_extern_main.c
 set libfile tls-so_extern
 set srcfile_lib ${libfile}.c

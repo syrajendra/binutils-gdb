@@ -18,6 +18,10 @@
 # Check that watchpoints get propagated to all existing threads when the
 # watchpoint is created.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 set NR_THREADS 4
 set X_INCR_COUNT 10
 

@@ -15,6 +15,10 @@
 
 # Make sure printing virtual base class data member works correctly (PR16841)
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 if { [skip_cplus_tests] } { continue }
 
 standard_testfile .cc

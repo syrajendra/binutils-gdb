@@ -18,6 +18,10 @@
 # stop (and so needs to be stepped over).  GDB used to trip on an
 # invalid assertion - PR17408.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}] == -1} {

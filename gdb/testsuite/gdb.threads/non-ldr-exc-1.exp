@@ -16,6 +16,10 @@
 # Test that when a thread other than the main thread execs, we follow
 # through to the new incarnation of the main thread.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 set executable ${testfile}
 

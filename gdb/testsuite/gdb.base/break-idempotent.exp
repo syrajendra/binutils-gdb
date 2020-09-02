@@ -34,6 +34,10 @@
 # The test is written in black-box style, and doesn't actually use
 # anything target remote specific, so let it run on all targets.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 # Force a breakpoint re-set in GDB.  Currently this is done by

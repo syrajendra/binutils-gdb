@@ -17,6 +17,10 @@
 # or all-stop modes, "target remote" does not return with the remote
 # thread marked running.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 load_lib gdbserver-support.exp
 load_lib prelink-support.exp
 

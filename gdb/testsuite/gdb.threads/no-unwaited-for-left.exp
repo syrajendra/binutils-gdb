@@ -16,6 +16,10 @@
 # Exit of a thread when there are other threads in the inferior should
 # not hang GDB.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 set executable ${testfile}
 

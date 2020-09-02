@@ -17,6 +17,10 @@
 # in non-stop).  GDB used to miss updating the parent/child running
 # states after a fork.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 # The test proper.

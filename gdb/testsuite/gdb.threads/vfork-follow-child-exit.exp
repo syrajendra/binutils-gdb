@@ -16,6 +16,10 @@
 # Test following a vfork child that exits, when the vfork parent is a
 # threaded program, and it's a non-main thread that vforks.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 if {[build_executable "failed to prepare" $testfile $srcfile {debug pthreads}]} {

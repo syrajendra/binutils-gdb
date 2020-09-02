@@ -15,6 +15,10 @@
 
 # This file is part of the gdb testsuite.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 load_lib completion-support.exp
 
 standard_testfile cpls.cc cpls2.cc cpls-hyphen.cc

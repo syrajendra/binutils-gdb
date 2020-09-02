@@ -18,6 +18,10 @@
 # Test displaced stepping over VEX-encoded RIP-relative AVX
 # instructions.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
     verbose "Skipping x86_64 displaced stepping tests."
     return

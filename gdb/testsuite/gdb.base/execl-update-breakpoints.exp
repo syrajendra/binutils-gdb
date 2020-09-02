@@ -16,6 +16,10 @@
 # Test that when following an exec, we don't try to insert breakpoints
 # in the new image at the addresses the symbols had before the exec.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 # Build two copies of the program, each linked at a different address.

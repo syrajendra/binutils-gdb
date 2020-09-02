@@ -17,6 +17,10 @@
 
 # Test that Ctrl-C works after reconnecting.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 load_lib gdbserver-support.exp
 
 if { [skip_gdbserver_tests] } {

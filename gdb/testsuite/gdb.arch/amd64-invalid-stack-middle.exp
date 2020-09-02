@@ -27,6 +27,10 @@
 # run twice, and we restart gdb before testing each different command to
 # ensure that nothing is being cached.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile .S
 
 if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {

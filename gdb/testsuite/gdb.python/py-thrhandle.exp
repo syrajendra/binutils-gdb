@@ -19,6 +19,10 @@
 # This file verifies that methods Inferior.thread_from_handle
 # and InferiorThread.handle work as expected.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 load_lib gdb-python.exp
 
 standard_testfile

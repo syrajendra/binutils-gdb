@@ -18,6 +18,10 @@
 # Test initial values of x87 control registers, before any x87
 # instructions have been executed in the inferior.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 if ![is_amd64_regs_target] then {
     return
 }

@@ -42,6 +42,10 @@
 # because the leader thread will only return an exit status after all
 # threads are reaped.  We test that as well.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 # Test that GDBserver exits.

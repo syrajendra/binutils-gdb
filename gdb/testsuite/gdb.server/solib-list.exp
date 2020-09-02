@@ -20,6 +20,10 @@
 # gdb /bin/prog
 # (gdb) target remote ...
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 load_lib gdbserver-support.exp
 load_lib prelink-support.exp
 

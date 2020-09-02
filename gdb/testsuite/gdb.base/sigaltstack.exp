@@ -22,6 +22,10 @@
 # This test confirms that GDB can both backtrace through and finish
 # such a stack.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 if [target_info exists gdb,nosignals] {
     verbose "Skipping sigaltstack.exp because of nosignals."
     continue

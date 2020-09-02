@@ -18,6 +18,10 @@
 # Test starting gdbserver passing it the name of a non-existing
 # program.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 load_lib gdbserver-support.exp
 
 standard_testfile

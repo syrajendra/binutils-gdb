@@ -15,6 +15,10 @@
 
 # Test that disconnecting and reconnecting doesn't lose signals.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 set gdbserver_reconnect_p 1
 if { [info proc gdb_reconnect] == "" } {
     return 0

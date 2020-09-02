@@ -16,6 +16,10 @@
 # Test that GDB steps over all breakpoints of threads not the stepping
 # thread, before actually proceeding with the stepped thread.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 set executable ${testfile}
 

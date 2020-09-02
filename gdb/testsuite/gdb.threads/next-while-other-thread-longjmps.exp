@@ -18,6 +18,10 @@
 # "next" commands in the main thread should be able to complete
 # undisturbed.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 set linenum [gdb_get_line_number "set break here"]

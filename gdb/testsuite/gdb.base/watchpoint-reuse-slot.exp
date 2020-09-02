@@ -22,6 +22,10 @@
 # operation.  (Note that we don't have any of these watchpoints
 # trigger.)
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {

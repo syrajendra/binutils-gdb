@@ -16,6 +16,10 @@
 # Test that "signal FOO" behaves correctly when we have multiple
 # threads that have stopped for a signal.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 if [target_info exists gdb,nosignals] {
     verbose "Skipping ${testfile}.exp because of nosignals."
     return -1

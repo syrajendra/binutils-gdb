@@ -21,6 +21,10 @@
 # reached.  It originally addresses a deficiency seen on embedded
 # powerpc targets with slotted hardware *point designs.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 set NR_THREADS 10
 set NR_TRIGGERS_PER_THREAD 2
 

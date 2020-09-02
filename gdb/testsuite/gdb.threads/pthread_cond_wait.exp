@@ -19,6 +19,10 @@
 # This file verifies that GDB is able to compute a backtrace for a thread
 # being blocked on a call to pthread_cond_wait(). 
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable debug] != "" } {

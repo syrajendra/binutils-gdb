@@ -16,6 +16,10 @@
 # Ensure that new threads created while an infcall is ongoing are set
 # to stopped state once the call finishes.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 if [prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}] {

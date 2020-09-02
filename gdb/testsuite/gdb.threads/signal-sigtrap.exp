@@ -16,6 +16,10 @@
 # Check that GDB doesn't forget to pass SIGTRAP to the program when
 # the user explicitly passes it with the signal command.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 if [target_info exists gdb,nosignals] {
     verbose "Skipping ${testfile}.exp because of nosignals."
     return -1

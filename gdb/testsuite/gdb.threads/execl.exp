@@ -15,6 +15,10 @@
 
 # Test handling of threads across an execl.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 # Original image, loads a thread library.
 standard_testfile
 

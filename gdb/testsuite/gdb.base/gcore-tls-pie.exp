@@ -17,6 +17,10 @@
 # Generate a core file from the stripped version of the program,
 # and then try to debug the core with the unstripped version.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug additional_flags=-fpie "ldflags=-pie -fuse-ld=gold"}]} {

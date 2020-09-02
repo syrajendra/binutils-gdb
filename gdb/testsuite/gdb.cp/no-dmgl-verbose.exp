@@ -15,6 +15,10 @@
 
 # Test loading symbols from unrelocated C++ object files.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile .cc
 
 if { [skip_cplus_tests] } { continue }

@@ -16,6 +16,10 @@
 # This file is part of the GDB testsuite.  It tests the mechanism
 # exposing values to Python.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 if { [skip_cplus_tests] } { continue }
 
 standard_testfile py-explore.cc

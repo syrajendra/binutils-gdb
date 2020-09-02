@@ -16,6 +16,10 @@
 # This file was written by Michael Snyder (msnyder@redhat.com)
 # This is a test for the gdb command "generate-core-file".
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 # Single-threaded test case
 standard_testfile pthreads.c
 set objfile  $binfile.o

@@ -17,6 +17,10 @@
 # through to the new incarnation of the main thread, even if the main
 # thread had already exited before the exec.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 set executable ${testfile}
 

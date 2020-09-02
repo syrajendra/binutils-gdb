@@ -22,6 +22,10 @@
 #
 # Caveat: Setting the handle to nopass, ends up in a endless loop.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 if { ![istarget i?86-*-*] && ![istarget x86_64-*-* ] } {
     verbose "Skipping x86 MPX tests."
     return

@@ -18,6 +18,10 @@
 # stop, when the thread that hit that breakpoint is not the stepped
 # thread.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 # Test relies on checking gdb debug output. Do not run if gdb debug is
 # enabled as any debug will be redirected to the log.
 if [gdb_debug_enabled] {

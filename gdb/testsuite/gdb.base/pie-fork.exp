@@ -16,6 +16,10 @@
 # Test that we can follow forks properly when the executable is
 # position-independent.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 set opts [list debug additional_flags=-fPIE ldflags=-pie]

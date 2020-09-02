@@ -24,6 +24,9 @@
 # The goal is not to test gdb functionality, which is done by other tests,
 # but the command syntax and correct output response to MI operations.
 #
+if [target_info exists gdb,skip_known_failures] {
+  return
+}
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"

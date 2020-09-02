@@ -16,6 +16,10 @@
 # multiple-successive-infcall.exp -- Test if GDB can invoke functions on
 # multiple inferiors, one after the other.
 
+if [target_info exists gdb,skip_known_failures] {
+  return
+}
+
 standard_testfile
 
 if [get_compiler_info] {

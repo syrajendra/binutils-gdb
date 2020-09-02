@@ -15,6 +15,10 @@
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 set ws "\[\r\n\t \]+"
 
 if { [skip_cplus_tests] } { continue }

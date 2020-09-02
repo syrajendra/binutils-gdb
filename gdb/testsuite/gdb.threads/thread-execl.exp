@@ -16,6 +16,10 @@
 # Test that GDB doesn't get stuck when stepping over an exec call done
 # by a thread other than the main thread.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" \

@@ -17,6 +17,10 @@
 # Also test that GDB can debug a .o file, and that it doesn't mind
 # a file that's more minimal than what a compiler normally puts out.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 set testfile weird
 set srcfile [standard_output_file weird.s]
 set binfile [standard_output_file weirdx.o]

@@ -16,6 +16,10 @@
 # Test that breakpoints on C++ constructors work, despite the
 # fact that gcc generates several versions of constructor function.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 if { [skip_cplus_tests] } { continue }
 
 

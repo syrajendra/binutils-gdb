@@ -16,6 +16,10 @@
 # Test -symbol-info-functions, -symbol-info-variables, and
 # -symbol-info-types.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 

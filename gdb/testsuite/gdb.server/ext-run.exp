@@ -17,6 +17,10 @@
 
 # Test running programs using extended-remote.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 load_lib gdbserver-support.exp
 
 standard_testfile server.c

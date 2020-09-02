@@ -18,6 +18,9 @@
 # Verify that, using the MI, we can create, update, delete variables.
 #
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"

@@ -20,6 +20,10 @@
 # single-threaded programs, even though they'd list the main thread in
 # response to qfThreadInfo/qsThreadInfo.  See PR remote/22597.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 load_lib gdbserver-support.exp
 
 if { [skip_gdbserver_tests] } {

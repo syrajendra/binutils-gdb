@@ -17,6 +17,9 @@
 
 # Test GDB stabs problem with qualified parameter of forward types.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
 
 set testfile "gdb11479"
 

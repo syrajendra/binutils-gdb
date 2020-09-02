@@ -22,6 +22,10 @@
 # (private, public, protected) 
 # classes have simple members and member functions.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 set ws "\[\r\n\t \]+"
 set nl "\[\r\n\]+"
 

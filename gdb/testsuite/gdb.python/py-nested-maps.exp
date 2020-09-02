@@ -17,6 +17,10 @@
 # structures using structures as keys and values, it then tests how
 # 'set print max-depth' affects this printing.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 load_lib gdb-python.exp
 
 standard_testfile

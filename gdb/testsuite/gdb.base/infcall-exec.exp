@@ -16,6 +16,10 @@
 # Test an inferior function call which execs a new program.
 # This is a test for breakpoints/19546.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 set testfile2 "infcall-exec2"

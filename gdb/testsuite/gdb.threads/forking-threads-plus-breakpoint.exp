@@ -16,6 +16,10 @@
 # This test verifies that several threads forking while another thread
 # is constantly stepping over a breakpoint is properly handled.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 set linenum [gdb_get_line_number "set break here"]

@@ -23,6 +23,10 @@
 #
 # See https://sourceware.org/bugzilla/show_bug.cgi?id=18749
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 set linenum [gdb_get_line_number "set break here"]

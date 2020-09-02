@@ -15,6 +15,10 @@
 
 # This problem is reproducible only when using `gdb/cc-with-index.sh'.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile gdbindex-stabs.c
 set srcfile_stabs ${testfile}.c
 set srcfile_dwarf ${testfile}-dwarf.c

@@ -20,6 +20,10 @@
 # Test gdbserver to handle qGetTLSAddr requests gracefully in case
 # libthread_db could not be loaded.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 load_lib gdbserver-support.exp
 
 standard_testfile

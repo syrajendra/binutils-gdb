@@ -21,6 +21,10 @@
 #
 # This test is only meaningful for standard remote connections.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 load_lib gdbserver-support.exp
 
 standard_testfile

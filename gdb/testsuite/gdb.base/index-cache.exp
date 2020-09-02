@@ -16,6 +16,10 @@
 # This test checks that the index-cache feature generates the expected files at
 # the expected location.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile \

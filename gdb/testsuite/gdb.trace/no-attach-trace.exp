@@ -17,6 +17,10 @@
 
 # Test that trying to trace without a process attached fails properly.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 load_lib trace-support.exp
 
 standard_testfile

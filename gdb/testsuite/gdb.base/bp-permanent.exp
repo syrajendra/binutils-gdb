@@ -17,6 +17,10 @@
 
 # Test stepping over permanent breakpoints.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 set options { debug }

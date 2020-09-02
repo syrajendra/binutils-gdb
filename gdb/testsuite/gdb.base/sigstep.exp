@@ -21,6 +21,10 @@
 # This test runs the program up to the signal handler, and then
 # attempts to step/next out of the handler and back into main.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 if [target_info exists gdb,nosignals] {
     verbose "Skipping sigstep.exp because of nosignals."
     continue

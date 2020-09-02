@@ -15,6 +15,10 @@
 
 # Test case for forgotten hw-watchpoints after fork()-off of a process.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 set testfile watchpoint-fork
 
 proc test {type symbol} {

@@ -18,6 +18,10 @@
 # The tests that use the maintenance command do not need tracepoint
 # support on the target, but they do want a live program.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 load_lib "trace-support.exp"
 
 

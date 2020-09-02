@@ -16,6 +16,10 @@
 # This file is part of the GDB testsuite.  It tests the mechanism
 # exposing values to Python.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 load_lib gdb-python.exp
 
 standard_testfile python.c python-1.c

@@ -18,6 +18,10 @@
 # Tests which verify (or not) that GDB can access in-scope variables
 # when stopped within an OpenMP parallel region.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 
 set have_nested_function_support 0

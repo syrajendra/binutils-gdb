@@ -19,6 +19,10 @@
 # non-ldr-exc-2.exp in that we have more than two threads in the
 # program when the exec happens.
 
+if [target_info exists gdb,skip_known_failures] {
+    return
+}
+
 standard_testfile
 set executable ${testfile}
 
