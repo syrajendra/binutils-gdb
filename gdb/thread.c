@@ -91,9 +91,12 @@ private:
 struct thread_info*
 inferior_thread (void)
 {
-  struct thread_info *tp = find_thread_ptid (inferior_ptid);
-  gdb_assert (tp);
-  return tp;
+  if (inferior_ptid != null_ptid) {
+    struct thread_info *tp = find_thread_ptid (inferior_ptid);
+    gdb_assert (tp);
+    return tp;
+  }
+  return NULL;
 }
 
 /* Delete the breakpoint pointed at by BP_P, if there's one.  */
