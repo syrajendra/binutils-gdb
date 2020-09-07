@@ -418,5 +418,8 @@ main(int argc, char *argv[])
 	/* Terminate argv list. */
 	add_arg(&args, NULL);
 
+	extern void initialize_all_kgdb_files(void);
+	initialize_all_kgdb_files();
+
 	return (gdb_main(&args));
 }
