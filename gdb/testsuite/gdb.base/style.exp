@@ -15,10 +15,6 @@
 
 # Test CLI output styling.
 
-if [target_info exists gdb,skip_known_failures] {
-    return
-}
-
 standard_testfile
 
 save_vars { env(TERM) } {
@@ -31,6 +27,10 @@ save_vars { env(TERM) } {
     if { [test_compiler_info "gcc-*"] || [test_compiler_info "clang-*"] } {
 	lappend options additional_flags=-g3
 	set test_macros 1
+    }
+
+    if { [test_compiler_info clang-*] } {
+    lappend options additional_flags=-fdebug-macro
     }
 
     if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
