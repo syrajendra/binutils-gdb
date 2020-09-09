@@ -22,7 +22,11 @@
 unsigned * __attribute__((noinline))
 start_sequence (unsigned * x, unsigned * y)
 {
-	return (unsigned *)0xdeadbeef;
+#ifdef __clang__
+	return x;
+#else
+  return (unsigned *)0xdeadbeef;
+#endif
 };
 
 unsigned __attribute__((noinline))

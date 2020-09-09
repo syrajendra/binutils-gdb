@@ -18,10 +18,6 @@
 # Test displaying call clobbered registers in optimized binaries.
 # GDB should not show incorrect values.
 
-if [target_info exists gdb,skip_known_failures] {
-    return
-}
-
 standard_testfile
 
 # What compiler are we using?
