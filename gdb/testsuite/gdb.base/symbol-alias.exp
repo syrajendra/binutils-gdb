@@ -14,9 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if [target_info exists gdb,skip_known_failures] {
-    return
-}
+#if [target_info exists gdb,skip_known_failures] {
+#    return
+#}
 
 standard_testfile symbol-alias.c symbol-alias2.c
 
@@ -36,6 +36,13 @@ foreach f {"func" "func_alias"} {
 }
 
 # Variables.
-foreach v {"g_var_s" "g_var_s_alias"} {
-    gdb_test "p $v" "= {field1 = 1, field2 = 2}"
+if { [test_compiler_info gcc-*] } {
+    foreach v {"g_var_s" "g_var_s_alias"} {
+        gdb_test "p $v" "= {field1 = 1, field2 = 2}"
+    }
+} else {
+    # clang does not generate DW_TAG_variable info for g_var_s_alias hence we need type cast
+    foreach v {"g_var_s" "g_var_s_alias"} {
+        gdb_test "p (struct S)$v" "= {field1 = 1, field2 = 2}"
+    }
 }
