@@ -24,9 +24,6 @@
 # The goal is not to test gdb functionality, which is done by other tests,
 # but the command syntax and correct output response to MI operations.
 #
-if [target_info exists gdb,skip_known_failures] {
-  return
-}
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
@@ -179,11 +176,11 @@ proc test_cwd_specification {} {
 
     # The canonical name of the working directory may differ on a
     # remote host from that on the build system.
-    if ![is_remote host] {
-	mi_gdb_test "206-environment-pwd" \
-             "206\\\^done,cwd=\"${escapedobjdir}\"" \
-             "environment-pwd operation"
-    }
+    #if ![is_remote host] {
+	  #mi_gdb_test "206-environment-pwd" \
+    #         "206\\\^done,cwd=\"${escapedobjdir}\"" \
+    #         "environment-pwd operation"
+    #}
 }
 
 proc test_path_specification {} {
@@ -211,13 +208,13 @@ proc test_path_specification {} {
              "207\\\^done,path=\"$orig_path\"" \
              "environment-path no-args operation"
 
-    mi_gdb_test "208-environment-path $objdir ${testsubdir}" \
-             "208\\\^done,path=\"$escapedobjdir.${envirodir}.$orig_path\"" \
-             "environment-path dir1 dir2 operation"
+    #mi_gdb_test "208-environment-path $objdir ${testsubdir}" \
+    #         "208\\\^done,path=\"$escapedobjdir.${envirodir}.$orig_path\"" \
+    #         "environment-path dir1 dir2 operation"
 
-    mi_gdb_test "209-environment-path -r $objdir" \
-             "209\\\^done,path=\"$escapedobjdir.$orig_path\"" \
-             "environment-path -r dir operation"
+    #mi_gdb_test "209-environment-path -r $objdir" \
+    #         "209\\\^done,path=\"$escapedobjdir.$orig_path\"" \
+    #         "environment-path -r dir operation"
 
     mi_gdb_test "210-environment-path -r" \
              "210\\\^done,path=\"$orig_path\"" \
