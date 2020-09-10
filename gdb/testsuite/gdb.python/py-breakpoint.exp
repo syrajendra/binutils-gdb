@@ -16,10 +16,6 @@
 # This file is part of the GDB testsuite.  It tests the mechanism
 # exposing breakpoints to Python.
 
-if [target_info exists gdb,skip_known_failures] {
-    return
-}
-
 load_lib gdb-python.exp
 
 standard_testfile
@@ -702,20 +698,27 @@ proc_with_prefix test_bkpt_qualified {} {
 proc_with_prefix test_bkpt_probe {} {
     global decimal hex testfile srcfile
 
-    if { [prepare_for_testing "failed to prepare" ${testfile}-probes \
+    if { [istarget "*-*-*freebsd*"] } {
+        if { [prepare_for_testing "failed to prepare" ${testfile}-probes \
+	    ${srcfile} {debug c++}] } {
+	    return -1
+        }
+    } else {
+        if { [prepare_for_testing "failed to prepare" ${testfile}-probes \
 	    ${srcfile} {debug c++ additional_flags=-DUSE_PROBES}] } {
-	return -1
-    }
+	    return -1
+        }
 
-    if ![runto_main] then {
-	fail "cannot run to main."
-	return 0
-    }
+        if ![runto_main] then {
+	    fail "cannot run to main."
+	    return 0
+        }
 
-    gdb_test \
-	"python gdb.Breakpoint(\"-probe test:result_updated\")" \
-	"Breakpoint $decimal at $hex" \
-	"-probe in spec string"
+        gdb_test \
+	    "python gdb.Breakpoint(\"-probe test:result_updated\")" \
+	    "Breakpoint $decimal at $hex" \
+        "-probe in spec string"
+    }
 }
 
 test_bkpt_basic

@@ -23,7 +23,12 @@ set libfile "solib1"
 set libsrc  $srcdir/$subdir/$libfile.c
 set lib_sl  [standard_output_file $libfile.sl]
 
+if { [test_compiler_info clang-*] } {
+set lib_opts  "debug additional_flags=-O0"
+} else {
 set lib_opts  debug
+}
+
 set exec_opts [list debug shlib=$lib_sl]
 
 if [get_compiler_info] {
@@ -45,6 +50,11 @@ gdb_load_shlib $lib_sl
 # This program implicitly loads SOM shared libraries.
 #
 if ![runto_main] then { fail "implicit solibs tests suppressed" }
+
+if { [target_info gdb_protocol] == "remote" } {
+    set outdir [file dirname $lib_sl]
+    gdb_test_no_output "set solib-search-path ${outdir}"
+}
 
 # Verify that we can step over the first shlib call.
 #
@@ -77,6 +87,9 @@ gdb_test_multiple "next" "step out of solib call" {
     }
     -re ".*exited normally.*$gdb_prompt $" {
     pass "step out of solib call"
+    }
+    -re ".*in _start.*$gdb_prompt $" {
+        pass "step out of solib call"
     }
 }
 

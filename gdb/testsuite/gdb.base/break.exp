@@ -15,10 +15,6 @@
 
 # This file was written by Rob Savoye. (rob@cygnus.com)
 
-if [target_info exists gdb,skip_known_failures] {
-    return
-}
-
 if { [prepare_for_testing "failed to prepare" "break" {break.c break1.c} {debug nowarnings}] } {
     return -1
 }

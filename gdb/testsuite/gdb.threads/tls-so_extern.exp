@@ -16,10 +16,6 @@
 # tls-so_extern.exp -- Expect script to test thread local storage in gdb, with
 # a variable defined in a shared library.
 
-if [target_info exists gdb,skip_known_failures] {
-    return
-}
-
 standard_testfile tls-so_extern_main.c
 set libfile tls-so_extern
 set srcfile_lib ${libfile}.c
@@ -44,6 +40,11 @@ gdb_load_shlib ${binfile_lib}
 if ![runto_main] then {
     fail "can't run to main"
     return 0
+}
+
+if { [target_info gdb_protocol] == "remote" } {
+	set outdir [file dirname $binfile_lib]
+	gdb_test_no_output "set solib-search-path ${outdir}"
 }
 
 gdb_test "print so_extern" "0x0" "print thread local storage variable"
