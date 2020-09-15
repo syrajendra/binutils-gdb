@@ -58,6 +58,9 @@ static struct gdbarch_data *fbsd_vmcore_data;
 
 struct fbsd_vmcore_ops
 {
+  /* Some arch requires the right PCB offsets to be initiated */
+  void (*init_pcb)(void);
+
   /* Supply registers for a pcb to a register cache.  */
   void (*supply_pcb)(struct regcache *, CORE_ADDR);
 
@@ -72,6 +75,15 @@ fbsd_vmcore_init (struct obstack *obstack)
 
   ops = OBSTACK_ZALLOC (obstack, struct fbsd_vmcore_ops);
   return ops;
+}
+
+void
+fbsd_vmcore_set_init_pcb (struct gdbarch *gdbarch,
+			  void (*init_pcb)(void))
+{
+  struct fbsd_vmcore_ops *ops = (struct fbsd_vmcore_ops *)
+    gdbarch_data (gdbarch, fbsd_vmcore_data);
+  ops->init_pcb = init_pcb;
 }
 
 /* Set the function that supplies registers from a pcb
@@ -399,6 +411,9 @@ fbsd_kvm_target_open (const char *args, int from_tty)
 	current_inferior()->push_target (&fbsd_kvm_ops);
 
 	kgdb_dmesg();
+        if (ops->init_pcb != NULL) {
+	  ops->init_pcb();
+        }
 
 	inf = current_inferior();
 	if (inf->pid == 0) {

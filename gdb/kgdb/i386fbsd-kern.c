@@ -90,22 +90,42 @@ get_i386fbsd_info (void)
   return info;
 }
 
+enum {
+      IDX_X86_EAX = 0,
+      IDX_X86_ECX,
+      IDX_X86_EDX,
+      IDX_X86_EBX,
+      IDX_X86_ESP,
+      IDX_X86_EBP,
+      IDX_X86_ESI,
+      IDX_X86_EDI,
+      IDX_X86_EIP,
+      IDX_X86_EFLAGS,
+      IDX_X86_CS,
+      IDX_X86_SS,
+      IDX_X86_DS,
+      IDX_X86_ES,
+      IDX_X86_FS,
+      IDX_X86_GS
+};
+
 /*
  * Even though the pcb contains fields for the segment selectors, only
  * %gs is updated on each context switch.  The other selectors are
  * saved in stoppcbs[], but we just hardcode their known values rather
  * than handling that special case.
  */
-static const int i386fbsd_pcb_offset[] = {
+/* JNPR: Switch to fetching the register offsets, to support legacy i386 */
+static int i386fbsd_pcb_offset[] = {
   -1,				/* %eax */
   -1,				/* %ecx */
   -1,				/* %edx */
-  4 * 4,			/* %ebx */
-  3 * 4,			/* %esp */
-  2 * 4,			/* %ebp */
-  1 * 4,			/* %esi */
-  0 * 4,			/* %edi */
-  5 * 4,			/* %eip */
+  -1,    		        /* %ebx */
+  -1,	       		        /* %esp */
+  -1,			        /* %ebp */
+  -1,			        /* %esi */
+  -1,			        /* %edi */
+  -1,			        /* %eip */
   -1,				/* %eflags */
   -1,				/* %cs */
   -1,				/* %ss */
@@ -118,6 +138,23 @@ static const int i386fbsd_pcb_offset[] = {
 #define	CODE_SEL	(4 << 3)
 #define	DATA_SEL	(5 << 3)
 #define	PRIV_SEL	(1 << 3)
+
+static void
+i386fbsd_init_pcb()
+{
+	i386fbsd_pcb_offset[IDX_X86_EBX] = parse_and_eval_address
+		("&((struct pcb *)0)->pcb_ebx");
+	i386fbsd_pcb_offset[IDX_X86_ESP] = parse_and_eval_address
+		("&((struct pcb *)0)->pcb_esp");
+	i386fbsd_pcb_offset[IDX_X86_EBP] = parse_and_eval_address
+		("&((struct pcb *)0)->pcb_ebp");
+	i386fbsd_pcb_offset[IDX_X86_ESI] = parse_and_eval_address
+		("&((struct pcb *)0)->pcb_esi");
+	i386fbsd_pcb_offset[IDX_X86_EDI] = parse_and_eval_address
+		("&((struct pcb *)0)->pcb_edi");
+	i386fbsd_pcb_offset[IDX_X86_EIP] = parse_and_eval_address
+		("&((struct pcb *)0)->pcb_eip");
+}
 
 static void
 i386fbsd_supply_pcb(struct regcache *regcache, CORE_ADDR pcb_addr)
@@ -462,6 +499,7 @@ i386fbsd_kernel_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
 
 	set_solib_ops(gdbarch, &kld_so_ops);
 
+	fbsd_vmcore_set_init_pcb(gdbarch, i386fbsd_init_pcb);
 	fbsd_vmcore_set_supply_pcb(gdbarch, i386fbsd_supply_pcb);
 	fbsd_vmcore_set_cpu_pcb_addr(gdbarch, kgdb_trgt_stop_pcb);
 }

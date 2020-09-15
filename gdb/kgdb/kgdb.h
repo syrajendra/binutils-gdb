@@ -53,6 +53,9 @@ struct kthr *kgdb_thr_next(struct kthr *);
 const char  *kgdb_thr_extra_thread_info(int);
 
 enum gdb_osabi fbsd_kernel_osabi_sniffer(bfd *abfd);
+
+void fbsd_vmcore_set_init_pcb (struct gdbarch *gdbarch,
+			       void (*init_pcb)(void));
 void fbsd_vmcore_set_supply_pcb (struct gdbarch *gdbarch,
 				 void (*supply_pcb) (struct regcache *,
 						     CORE_ADDR));
