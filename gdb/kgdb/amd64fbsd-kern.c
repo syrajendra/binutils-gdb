@@ -43,35 +43,83 @@
 
 #include "kgdb.h"
 
-static const int amd64fbsd_pcb_offset[] = {
-  -1,				/* %rax */
-  6 * 8,			/* %rbx */
-  -1,				/* %rcx */
-  -1,				/* %rdx */
-  -1,				/* %rsi */
-  -1,				/* %rdi */
-  4 * 8,			/* %rbp */
-  5 * 8,			/* %rsp */
-  -1,				/* %r8 ...  */
+enum {
+      IDX_AMD64_RAX = 0,
+      IDX_AMD64_RBX,
+      IDX_AMD64_RCX,
+      IDX_AMD64_RDX,
+      IDX_AMD64_RSI,
+      IDX_AMD64_RDI,
+      IDX_AMD64_RBP,
+      IDX_AMD64_RSP,
+      IDX_AMD64_R8,
+      IDX_AMD64_R9,
+      IDX_AMD64_R10,
+      IDX_AMD64_R11,
+      IDX_AMD64_R12,
+      IDX_AMD64_R13,
+      IDX_AMD64_R14,
+      IDX_AMD64_R15,
+      IDX_AMD64_RIP,
+      IDX_AMD64_EFLAGS,
+      IDX_AMD64_CS,
+      IDX_AMD64_SS,
+      IDX_AMD64_DS,
+      IDX_AMD64_ES,
+      IDX_AMD64_FS,
+      IDX_AMD64_GS
+};
+
+static int amd64fbsd_pcb_offset[] = {
+  -1,                           /* %rax */
+  -1,                           /* %rbx */
+  -1,                           /* %rcx */
+  -1,                           /* %rdx */
+  -1,                           /* %rsi */
+  -1,                           /* %rdi */
+  -1,                           /* %rbp */
+  -1,                           /* %rsp */
+  -1,                           /* %r8 ...  */
   -1,
   -1,
   -1,
-  3 * 8,
-  2 * 8,
-  1 * 8,
-  0 * 8,			/* ... %r15 */
-  7 * 8,			/* %rip */
-  -1,				/* %eflags */
-  -1,				/* %cs */
-  -1,				/* %ss */
-  -1,				/* %ds */
-  -1,				/* %es */
-  -1,				/* %fs */
-  -1				/* %gs */
+  -1,
+  -1,
+  -1,
+  -1,                           /* ... %r15 */
+  -1,                           /* %rip */
+  -1,                           /* %eflags */
+  -1,                           /* %cs */
+  -1,                           /* %ss */
+  -1,                           /* %ds */
+  -1,                           /* %es */
+  -1,                           /* %fs */
+  -1                            /* %gs */
 };
 
 #define	CODE_SEL	(4 << 3)
 #define	DATA_SEL	(5 << 3)
+
+static void
+amd64fbsd_init_pcb()
+{
+	amd64fbsd_pcb_offset[IDX_AMD64_RBX] = parse_and_eval_address
+		("&((struct pcb *)0)->pcb_rbx");
+	amd64fbsd_pcb_offset[IDX_AMD64_RBP] = parse_and_eval_address
+		("&((struct pcb *)0)->pcb_rbp");
+	amd64fbsd_pcb_offset[IDX_AMD64_RSP] = parse_and_eval_address
+		("&((struct pcb *)0)->pcb_rsp");
+	amd64fbsd_pcb_offset[IDX_AMD64_R12] = parse_and_eval_address
+		("&((struct pcb *)0)->pcb_r12");
+	amd64fbsd_pcb_offset[IDX_AMD64_R13] = parse_and_eval_address
+		("&((struct pcb *)0)->pcb_r13");
+	amd64fbsd_pcb_offset[IDX_AMD64_R14] = parse_and_eval_address
+		("&((struct pcb *)0)->pcb_r14");
+	amd64fbsd_pcb_offset[IDX_AMD64_R15] = parse_and_eval_address
+		("&((struct pcb *)0)->pcb_r15");
+	amd64fbsd_pcb_offset[IDX_AMD64_RIP] = parse_and_eval_address
+		("&((struct pcb *)0)->pcb_rip");
+}
 
 static void
 amd64fbsd_supply_pcb(struct regcache *regcache, CORE_ADDR pcb_addr)
@@ -235,6 +283,7 @@ amd64fbsd_kernel_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
 
 	set_solib_ops(gdbarch, &kld_so_ops);
 
+	fbsd_vmcore_set_init_pcb(gdbarch, amd64fbsd_init_pcb);
 	fbsd_vmcore_set_supply_pcb(gdbarch, amd64fbsd_supply_pcb);
 	fbsd_vmcore_set_cpu_pcb_addr(gdbarch, kgdb_trgt_stop_pcb);
 }
