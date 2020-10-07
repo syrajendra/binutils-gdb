@@ -37,4 +37,4 @@ set srcfile $testfile.c
 gdb_breakpoint [gdb_get_line_number "break-here"]
 
 gdb_continue_to_breakpoint "break-here" ".* break-here .*"
-gdb_test "p y" " = 25"
+gdb_test "p y" " = 25|<optimized out>"
