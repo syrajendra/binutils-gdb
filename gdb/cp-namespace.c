@@ -33,6 +33,8 @@
 #include "language.h"
 #include "namespace.h"
 #include <string>
+#include <iterator>
+#include <map>
 
 static struct block_symbol
   cp_lookup_nested_symbol_1 (struct type *container_type,
@@ -377,7 +379,8 @@ cp_lookup_symbol_via_imports (const char *scope,
 			      const domain_enum domain,
 			      const int search_scope_first,
 			      const int declaration_only,
-			      const int search_parents)
+			      const int search_parents,
+            std::map<std::string, struct block_symbol> &scopeVisited)
 {
   struct using_direct *current;
   struct block_symbol sym = {};
@@ -464,9 +467,18 @@ cp_lookup_symbol_via_imports (const char *scope,
 	      /* If this import statement creates no alias, pass
 		 current->inner as NAMESPACE to direct the search
 		 towards the imported namespace.  */
-	      sym = cp_lookup_symbol_via_imports (current->import_src,
-						  name, block,
-						  domain, 1, 0, 0);
+        std::string key = std::string(scope) + "#" + std::string(name);
+        std::map<std::string, struct block_symbol>::iterator it;
+        it = scopeVisited.find(key);
+        if (it != scopeVisited.end()) {
+          sym = it->second;
+        } else {
+          sym = cp_lookup_symbol_via_imports (current->import_src,
+              name, block,
+              domain, 1, 0, 0, scopeVisited);
+          key = std::string(current->import_src) + "#" + std::string(name);
+          scopeVisited.insert  (std::pair<std::string, struct block_symbol>(key, sym));
+        }
 	    }
 
 	  if (sym.symbol != NULL)
@@ -586,8 +598,9 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 	    }
 	}
     }
-
-  result = cp_lookup_symbol_via_imports (scope, name, block, domain, 0, 1, 1);
+  std::map<std::string, struct block_symbol> scopeVisited;
+  result = cp_lookup_symbol_via_imports (scope, name, block, domain, 0, 1, 1, scopeVisited);
+  scopeVisited.clear();
   if (symbol_lookup_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
@@ -608,10 +621,12 @@ cp_lookup_symbol_via_all_imports (const char *scope, const char *name,
 				  const domain_enum domain)
 {
   struct block_symbol sym;
+  std::map<std::string, struct block_symbol> scopeVisited;
 
   while (block != NULL)
     {
-      sym = cp_lookup_symbol_via_imports (scope, name, block, domain, 0, 0, 1);
+      sym = cp_lookup_symbol_via_imports (scope, name, block, domain, 0, 0, 1, scopeVisited);
+      scopeVisited.clear();
       if (sym.symbol)
 	return sym;
 
