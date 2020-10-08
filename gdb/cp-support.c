@@ -41,6 +41,7 @@
 #include <atomic>
 #include "event-top.h"
 #include "run-on-main-thread.h"
+#include <algorithm>
 
 #define d_left(dc) (dc)->u.s_binary.left
 #define d_right(dc) (dc)->u.s_binary.right
@@ -60,7 +61,8 @@ static void overload_list_add_symbol (struct symbol *sym,
 
 static void add_symbol_overload_list_using
   (const char *func_name, const char *the_namespace,
-   std::vector<symbol *> *overload_list);
+   std::vector<symbol *> *overload_list,
+   std::vector<std::string> &scopeVisited);
 
 static void add_symbol_overload_list_qualified
   (const char *func_name,
@@ -1253,8 +1255,9 @@ make_symbol_overload_list (const char *func_name,
 
   overload_list.reserve (100);
 
-  add_symbol_overload_list_using (func_name, the_namespace, &overload_list);
-
+  std::vector <std::string> scopeVisited;
+  add_symbol_overload_list_using (func_name, the_namespace, &overload_list, scopeVisited);
+  scopeVisited.clear();
   if (the_namespace[0] == '\0')
     name = func_name;
   else
@@ -1394,7 +1397,8 @@ add_symbol_overload_list_adl (gdb::array_view<type *> arg_types,
 static void
 add_symbol_overload_list_using (const char *func_name,
 				const char *the_namespace,
-				std::vector<symbol *> *overload_list)
+				std::vector<symbol *> *overload_list,
+        std::vector<std::string> &scopeVisited)
 {
   struct using_direct *current;
   const struct block *block;
@@ -1426,9 +1430,11 @@ add_symbol_overload_list_using (const char *func_name,
 	    scoped_restore reset_directive_searched
 	      = make_scoped_restore (&current->searched, 1);
 
+      if (std::find(scopeVisited.begin(), scopeVisited.end(), the_namespace) != scopeVisited.end()) continue;
 	    add_symbol_overload_list_using (func_name,
 					    current->import_src,
-					    overload_list);
+					    overload_list, scopeVisited);
+      scopeVisited.push_back (current->import_src);
 	  }
       }
 
