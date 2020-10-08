@@ -406,6 +406,13 @@ readline_internal_setup (void)
 {
   char *nprompt;
 
+  /* Set up input and output if they are not already set up. */
+  if (!rl_instream)
+    rl_instream = stdin;
+
+  if (!rl_outstream)
+    rl_outstream = stdout;
+
   _rl_in_stream = rl_instream;
   _rl_out_stream = rl_outstream;
 
