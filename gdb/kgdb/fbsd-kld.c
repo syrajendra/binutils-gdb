@@ -396,7 +396,18 @@ kld_solib_create_inferior_hook (int from_tty)
 			    lookup_struct_elt (link_type, "tqe_next",
 				0).offset / 8;
 		} catch (const gdb_exception_error &e2) {
-			return;
+			try {
+				info->off_address = parse_and_eval_address
+					("&((struct linker_file *)0)->address");
+				info->off_filename = parse_and_eval_address
+					("&((struct linker_file *)0)->filename");
+				info->off_pathname = parse_and_eval_address
+					("&((struct linker_file *)0)->pathname");
+				info->off_next = parse_and_eval_address
+					("&((struct linker_file *)0)->link.tqe_next");
+			} catch (const gdb_exception_error &e3) {
+				return;
+			}
 		}
 	}
 
