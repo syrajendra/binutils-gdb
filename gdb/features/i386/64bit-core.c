@@ -46,6 +46,15 @@ create_feature_i386_64bit_core (struct target_desc *result, long regnum)
   tdesc_create_reg (feature, "r14", regnum++, 1, NULL, 64, "int64");
   tdesc_create_reg (feature, "r15", regnum++, 1, NULL, 64, "int64");
   tdesc_create_reg (feature, "rip", regnum++, 1, NULL, 64, "code_ptr");
+#if defined(TARGET_OS) && FreeBSD == TARGET_OS
+  tdesc_create_reg (feature, "eflags", regnum++, 1, NULL, 64, "int64");
+  tdesc_create_reg (feature, "cs", regnum++, 1, NULL, 64, "int64");
+  tdesc_create_reg (feature, "ss", regnum++, 1, NULL, 64, "int64");
+  tdesc_create_reg (feature, "ds", regnum++, 1, NULL, 16, "int16");
+  tdesc_create_reg (feature, "es", regnum++, 1, NULL, 16, "int16");
+  tdesc_create_reg (feature, "fs", regnum++, 1, NULL, 16, "int16");
+  tdesc_create_reg (feature, "gs", regnum++, 1, NULL, 16, "int16");
+#else
   tdesc_create_reg (feature, "eflags", regnum++, 1, NULL, 32, "i386_eflags");
   tdesc_create_reg (feature, "cs", regnum++, 1, NULL, 32, "int32");
   tdesc_create_reg (feature, "ss", regnum++, 1, NULL, 32, "int32");
@@ -53,6 +62,7 @@ create_feature_i386_64bit_core (struct target_desc *result, long regnum)
   tdesc_create_reg (feature, "es", regnum++, 1, NULL, 32, "int32");
   tdesc_create_reg (feature, "fs", regnum++, 1, NULL, 32, "int32");
   tdesc_create_reg (feature, "gs", regnum++, 1, NULL, 32, "int32");
+#endif
   tdesc_create_reg (feature, "st0", regnum++, 1, NULL, 80, "i387_ext");
   tdesc_create_reg (feature, "st1", regnum++, 1, NULL, 80, "i387_ext");
   tdesc_create_reg (feature, "st2", regnum++, 1, NULL, 80, "i387_ext");

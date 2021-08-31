@@ -79,10 +79,10 @@ static int amd64fbsd64_r_reg_offset[] =
   REG_OFFSET (r_rflags),
   REG_OFFSET (r_cs),
   REG_OFFSET (r_ss),
-  -1,
-  -1,
-  -1,
-  -1
+  REG_OFFSET (r_ds),
+  REG_OFFSET (r_es),
+  REG_OFFSET (r_fs),
+  REG_OFFSET (r_gs)
 };
 
 
@@ -103,7 +103,7 @@ static int amd64fbsd32_r_reg_offset[I386_NUM_GREGS] =
   9 * 8, 8 * 8,			/* %esi, %edi */
   17 * 8, 19 * 8,		/* %eip, %eflags */
   18 * 8, 21 * 8,		/* %cs, %ss */
-  -1, -1, -1, -1		/* %ds, %es, %fs, %gs */
+  (16 * 8) + 4 + 2, (16 * 8) + 4, (15 * 8) + 4,  (15 * 8) + 4 + 2, (15 * 8) + 4 + 2        /* %ds, %es, %fs, %gs */
 };
 
 

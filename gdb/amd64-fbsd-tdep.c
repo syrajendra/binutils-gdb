@@ -110,10 +110,10 @@ static int amd64fbsd_r_reg_offset[] =
   19 * 8,			/* %eflags */
   18 * 8,			/* %cs */
   21 * 8,			/* %ss */
-  -1,				/* %ds */
-  -1,				/* %es */
-  -1,				/* %fs */
-  -1				/* %gs */
+  (16 * 8) + 4 + 2,    /* %ds */
+  (16 * 8) + 4,        /* %es */
+  (15 * 8) + 4,        /* %fs */
+  (15 * 8) + 4 + 2     /* %gs */
 };
 
 /* Location of the signal trampoline.  */
