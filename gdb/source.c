@@ -490,6 +490,7 @@ add_path (const char *dirname, char **which_path, int parse_separators)
       struct stat st;
       gdb::unique_xmalloc_ptr<char> new_name_holder;
 
+      if (!name || !strlen(name)) continue;
       /* Spaces and tabs will have been removed by buildargv().
          NAME is the start of the directory.
 	 P is the '\0' following the end.  */
