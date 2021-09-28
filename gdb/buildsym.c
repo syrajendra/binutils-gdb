@@ -666,7 +666,7 @@ buildsym_compunit::pop_subfile ()
 
 void
 buildsym_compunit::record_line (struct subfile *subfile, int line,
-				CORE_ADDR pc)
+				CORE_ADDR pc, bool is_stmt)
 {
   struct linetable_entry *e;
 
@@ -687,7 +687,7 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
       m_have_line_numbers = true;
     }
 
-  if (subfile->line_vector->nitems + 1 >= subfile->line_vector_length)
+  if (subfile->line_vector->nitems >= subfile->line_vector_length)
     {
       subfile->line_vector_length *= 2;
       subfile->line_vector = (struct linetable *)
@@ -710,18 +710,24 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
      end of sequence markers.  All we lose is the ability to set
      breakpoints at some lines which contain no instructions
      anyway.  */
-  if (line == 0 && subfile->line_vector->nitems > 0)
+  if (line == 0)
+  {
+    struct linetable_entry *last = nullptr;
+    while (subfile->line_vector->nitems > 0)
     {
-      e = subfile->line_vector->item + subfile->line_vector->nitems - 1;
-      while (subfile->line_vector->nitems > 0 && e->pc == pc)
-	{
-	  e--;
-	  subfile->line_vector->nitems--;
+      last = subfile->line_vector->item + subfile->line_vector->nitems - 1;
+      if (last->pc != pc)
+        break;
+      subfile->line_vector->nitems--;
 	}
-    }
+    /* Ignore an end-of-sequence marker marking an empty sequence.  */
+    if (last == nullptr || last->line == 0)
+      return;
+  }
 
   e = subfile->line_vector->item + subfile->line_vector->nitems++;
   e->line = line;
+  e->is_stmt = is_stmt ? 1 : 0;
   e->pc = pc;
 }
 

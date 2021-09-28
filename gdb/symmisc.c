@@ -306,6 +306,8 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	{
 	  fprintf_filtered (outfile, " line %d at ", l->item[i].line);
 	  fputs_filtered (paddress (gdbarch, l->item[i].pc), outfile);
+      if (l->item[i].is_stmt)
+        fprintf_filtered (outfile, "\t(stmt)");
 	  fprintf_filtered (outfile, "\n");
 	}
     }
@@ -992,16 +994,17 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
 
       /* Leave space for 6 digits of index and line number.  After that the
 	 tables will just not format as well.  */
-      printf_filtered (_("%-6s %6s %s\n"),
-		       _("INDEX"), _("LINE"), _("ADDRESS"));
+      printf_filtered (_("%-6s %6s %s %s\n"),
+		       _("INDEX"), _("LINE"), _("ADDRESS"), _("IS-STMT"));
 
       for (i = 0; i < linetable->nitems; ++i)
 	{
 	  struct linetable_entry *item;
 
 	  item = &linetable->item [i];
-	  printf_filtered (_("%-6d %6d %s\n"), i, item->line,
-			   core_addr_to_string (item->pc));
+	  printf_filtered (_("%-6d %6d %s %s\n"), i, item->line,
+			   core_addr_to_string (item->pc),
+               (item->is_stmt ? " Y" : ""));
 	}
     }
 
