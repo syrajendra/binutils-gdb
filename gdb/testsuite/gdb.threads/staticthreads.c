@@ -56,7 +56,9 @@ main (int argc, char **argv)
   pthread_attr_t attr;
 
   pthread_attr_init (&attr);
+#ifndef __FreeBSD__
   pthread_attr_setstacksize (&attr, PTHREAD_STACK_MIN);
+#endif
 
   if (sem_init (&semaphore, 0, 0) == -1)
     {
