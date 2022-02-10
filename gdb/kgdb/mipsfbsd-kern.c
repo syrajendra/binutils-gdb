@@ -111,7 +111,7 @@ mipsfbsd_supply_pcb(struct regcache *regcache, CORE_ADDR pcb_addr)
 			buf + (regsize * FBSD_PCB_REG_S7));
   regcache->raw_supply (MIPS_SP_REGNUM,
 			buf + (regsize * FBSD_PCB_REG_SP));
-  regcache->raw_supply (MIPS_S2_REGNUM + 6,
+  regcache->raw_supply (MIPS_SP_REGNUM + 1,
 			buf + (regsize * FBSD_PCB_REG_S8));
   regcache->raw_supply (MIPS_RA_REGNUM,
 			buf + (regsize * FBSD_PCB_REG_RA));
