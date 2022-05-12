@@ -107,7 +107,7 @@ typedef long max_align_t;
 #if defined _MSC_VER && defined __cplusplus
 # include <cstddef>
 #else
-# if __linux__
+# if defined __linux__
 # if ! (@HAVE_MAX_ALIGN_T@ || defined _GCC_MAX_ALIGN_T)
 #  if !GNULIB_defined_max_align_t
 /* On the x86, the maximum storage alignment of double, long, etc. is 4,
