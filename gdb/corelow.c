@@ -232,11 +232,15 @@ core_target::build_file_mappings ()
 	    if (expanded_fname == nullptr)
 	      {
 		m_core_unavailable_mappings.emplace_back (start, end - start);
-		/* Print just one warning per path.  */
-		if (unavailable_paths.insert (filename).second)
-		  warning (_("Can't open file %s during file-backed mapping "
-			     "note processing"),
-			   filename);
+        /* Print just one warning per path.  */
+        /*
+         * PR-1630535
+         * Below messages need to be supressed when running cross GDB
+         * if (unavailable_paths.insert (filename).second)
+         *  warning (_("Can't open file %s during file-backed mapping "
+         *	     "note processing"),
+         *	   filename);
+         */
 		return;
 	      }
 
@@ -255,9 +259,13 @@ core_target::build_file_mappings ()
 		   Output both the path from the core file note along
 		   with its expansion to make debugging this problem
 		   easier.  */
-		warning (_("Can't open file %s which was expanded to %s "
-			   "during file-backed mapping note processing"),
-			 filename, expanded_fname.get ());
+        /*
+         * PR-1630535
+         * Below messages need to be supressed when running cross GDB
+         * warning (_("Can't open file %s which was expanded to %s "
+         *	   "during file-backed mapping note processing"),
+         *	 filename, expanded_fname.get ());
+         */
 		if (bfd != nullptr)
 		  bfd_close (bfd);
 		return;

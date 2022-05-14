@@ -642,8 +642,13 @@ cp_canonicalize_string (const char *string)
 
   if (!us)
     {
-      warning (_("internal error: string \"%s\" failed to be canonicalized"),
-	       string);
+     /*
+      * PR - 1540839
+      * The print message outputs a large string this makes gdb unusable on emacs
+      * Workaround: Disabling this warning until a proper fix is found
+      * warning (_("internal error: string \"%s\" failed to be canonicalized"),
+      *     string);
+      */
       return nullptr;
     }
 
