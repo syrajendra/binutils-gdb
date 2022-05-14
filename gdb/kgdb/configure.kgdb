@@ -1,0 +1,123 @@
+get_kgdb_objs() {
+case "${target}" in
+  aarch64*-*-freebsd*)
+	# Target: FreeBSD/aarch64
+	kgdb_target_obs="${kgdb_target_obs} aarch64-fbsd-kern.o"
+	;;
+
+  arm*-*-freebsd*)
+	# Target: FreeBSD/arm
+	kgdb_target_obs="${kgdb_target_obs} arm-fbsd-kern.o"
+	;;
+
+  i[34567]86-*-freebsd* | i[34567]86-*-kfreebsd*-gnu)
+ 	# Target: FreeBSD/i386
+	kgdb_target_obs="${kgdb_target_obs} i386fbsd-kern.o"
+	if test "x$enable_64_bit_bfd" = "xyes"; then
+	    # Target: FreeBSD amd64
+	    kgdb_target_obs="amd64fbsd-kern.o ${kgdb_target_obs}"
+	fi
+ 	;;
+
+  mips64*-*-freebsd*)
+	# Target: MIPS64 running FreeBSD
+	kgdb_target_obs="${kgdb_target_obs} mipsfbsd-kern.o"
+	;;
+
+  mips*-*-freebsd*)
+	# Target: MIPS32 running FreeBSD
+	kgdb_target_obs="${kgdb_target_obs} mipsfbsd-kern.o"
+	;;
+
+  powerpc64*-*-freebsd*)
+	# Target: FreeBSD/powerpc64
+	kgdb_target_obs="${kgdb_target_obs} ppcfbsd-kern.o"
+	;;
+
+  powerpc*-*-freebsd*)
+	# Target: FreeBSD/powerpc
+	kgdb_target_obs="${kgdb_target_obs} ppcfbsd-kern.o"
+	;;
+
+  x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
+        # Target: FreeBSD/amd64
+	kgdb_target_obs="${kgdb_target_obs} amd64fbsd-kern.o"
+	;;
+esac
+echo "$kgdb_target_obs"
+}
+
+get_gdb_sim() {
+case "${target}" in
+  mips*-*-freebsd*)
+	gdb_sim=../../sim/mips/libsim.a
+	;;
+  arm*-*-freebsd*)
+	gdb_sim=../../sim/arm/libsim.a
+	;;
+  aarch64*-*-freebsd*)
+	gdb_sim=../../sim/aarch64/libsim.a
+	;;
+  ppc*-*-freebsd*|powerpc*-*-freebsd*)
+	gdb_sim=../../sim/ppc/libsim.a
+	;;
+esac
+echo "$gdb_sim"
+}
+
+get_kgdb_cflags_extra() {
+case "${target}" in
+  aarch64*-*-freebsd*)
+	# Target: FreeBSD/arm64
+	kgdb_cflags_extra=" -I$srcdir/include/aarch64 -DKGDB_TGT_ARCH_aarch64 "
+	;;
+
+  arm*-*-freebsd*)
+	# Target: FreeBSD/arm
+	kgdb_cflags_extra=" -I$srcdir/include/arm -DKGDB_TGT_ARCH_arm "
+	;;
+
+  i[34567]86-*-freebsd* | i[34567]86-*-kfreebsd*-gnu)
+	# Target: FreeBSD/i386
+	kgdb_cflags_extra=" -I$srcdir/include/i386 -DKGDB_TGT_ARCH_i386 "
+	;;
+
+  mips64*-*-freebsd*)
+	# Target: MIPS64 running FreeBSD
+	kgdb_cflags_extra=" -I$srcdir/include/mips64 -DKGDB_TGT_ARCH_mips64 "
+	;;
+
+  mips*-*-freebsd*)
+	# Target: MIPS32 running FreeBSD
+	kgdb_cflags_extra=" -I$srcdir/include/mips -DKGDB_TGT_ARCH_mips "
+	;;
+
+  powerpc64*-*-freebsd*)
+	# Target: PPC64 running FreeBSD
+	kgdb_cflags_extra=" -I$srcdir/include/powerpc64 -DKGDB_TGT_ARCH_powerpc64 "
+	;;
+
+  powerpc*-*-freebsd*)
+	# Target: PPC32 running FreeBSD
+	kgdb_cflags_extra=" -I$srcdir/include/powerpc -DKGDB_TGT_ARCH_powerpc "
+	;;
+
+  x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
+        # Target: FreeBSD/amd64
+	kgdb_cflags_extra=" -I$srcdir/include/amd64 -DKGDB_TGT_ARCH_amd64 "
+	;;
+esac
+echo "$kgdb_cflags_extra"
+}
+
+get_kgdb_host_ldflags() {
+case "${host_alias}" in
+  *freebsd*)
+	kgdb_host_ldflags=" -liconv -Wl,-Bstatic -lmpfr -lgmp -Wl,-Bdynamic -lkvm "
+	;;
+  *linux*)
+	kgdb_host_ldflags=" -ldl -Wl,-Bstatic -lmpfr -lgmp -Wl,-Bdynamic libbsd/src/.libs/libbsd.a -lpthread "
+	;;
+esac
+echo "$kgdb_host_ldflags"
+}

@@ -2132,6 +2132,35 @@ fi
 AC_SUBST(LIBBACKTRACE_INC)
 AC_SUBST(LIBBACKTRACE_LIB)
 
+# KGDB part
+case "$target" in
+  aarch64*-*-freebsd*)                         fbsd_trgt="yes" ;;
+  arm*-*-freebsd*)                             fbsd_trgt="yes" ;;
+  i*86-*-freebsd* | i*86-*-kfreebsd*-gnu)      fbsd_trgt="yes" ;;
+  mips64*-*-freebsd*)                          fbsd_trgt="yes" ;;
+  mips*-*-freebsd*)                            fbsd_trgt="yes" ;;
+  powerpc64*-*-freebsd*)                       fbsd_trgt="yes" ;;
+  powerpc*-*-freebsd*)                         fbsd_trgt="yes" ;;
+  x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)  fbsd_trgt="yes" ;;
+  *)                                           fbsd_trgt="no"  ;;
+esac
+
+if test "$fbsd_trgt" = "yes"; then
+  AC_DEFINE(FBSD_TRGT, 1, [Define to 1 if fbsd target])
+  configure_kgdb="yes"
+fi
+
+case "$host_alias" in
+  i*86-*-freebsd* | i*86-*-kfreebsd*-gnu) configure_kgdb="no" ;;
+  *freebsd*) ;;
+  *linux*) configure_kgdb="no" ;;
+  *) configure_kgdb="no" ;;
+esac
+
+if test "$configure_kgdb" = "yes"; then
+  AC_CONFIG_SUBDIRS(kgdb)
+fi
+
 # Check for babeltrace and babeltrace-ctf
 AC_ARG_WITH(babeltrace,
   AS_HELP_STRING([--with-babeltrace], [include babeltrace support (auto/yes/no)]),

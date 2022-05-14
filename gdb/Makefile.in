@@ -204,10 +204,10 @@ LIBXXHASH = @LIBXXHASH@
 LIBIPT = @LIBIPT@
 
 # Where is libgmp?
-LIBGMP = @LIBGMP@
+LIBGMP = -Wl,-Bstatic @LIBGMP@ -Wl,-Bdynamic
 
 # Where is libmpfr?  This will be empty if libmpfr was not available.
-LIBMPFR = @LIBMPFR@
+LIBMPFR = -Wl,-Bstatic @LIBMPFR@ -Wl,-Bdynamic
 
 # GNU source highlight library.
 SRCHIGH_LIBS = @SRCHIGH_LIBS@
@@ -920,7 +920,8 @@ FLAGS_TO_PASS = \
 	"INSTALL_SCRIPT=$(INSTALL_SCRIPT)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"RUNTEST=$(RUNTEST)" \
-	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
+	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
+	"CONFIG_LDFLAGS=$(CONFIG_LDFLAGS)"
 
 # Flags that we pass when building the testsuite.
 
@@ -1647,8 +1648,8 @@ generated_files = \
 # Flags needed to compile Python code
 PYTHON_CFLAGS = @PYTHON_CFLAGS@
 
-all: gdb$(EXEEXT) $(CONFIG_ALL) gdb-gdb.py gdb-gdb.gdb
-	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=$(SUBDIRS)" subdir_do
+all: gdb$(EXEEXT) libgdb.a $(CONFIG_ALL) gdb-gdb.py gdb-gdb.gdb
+	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=`echo $(SUBDIRS) | sed 's/testsuite//'`" subdir_do
 
 # Rule for compiling .c files in the top-level gdb directory.
 # The order-only dependencies ensure that we create the build subdirectories.

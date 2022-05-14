@@ -1,0 +1,214 @@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+host_alias = @host_alias@
+target_alias = @target_alias@
+program_transform_name = @program_transform_name@
+bindir = @bindir@
+libdir = @libdir@
+tooldir = $(libdir)/$(target_alias)
+
+datadir = @datadir@
+localedir = @localedir@
+mandir = @mandir@
+man1dir = $(mandir)/man1
+man2dir = $(mandir)/man2
+man3dir = $(mandir)/man3
+man4dir = $(mandir)/man4
+man5dir = $(mandir)/man5
+man6dir = $(mandir)/man6
+man7dir = $(mandir)/man7
+man8dir = $(mandir)/man8
+man9dir = $(mandir)/man9
+infodir = @infodir@
+datarootdir = @datarootdir@
+docdir = @docdir@
+htmldir = @htmldir@
+pdfdir = @pdfdir@
+includedir = @includedir@
+
+install_sh = @install_sh@
+
+# This can be referenced by `LIBINTL' as computed by
+# ZW_GNU_GETTEXT_SISTER_DIR.
+top_builddir = .
+
+SHELL = @SHELL@
+EXEEXT = @EXEEXT@
+
+AWK = @AWK@
+LN_S = @LN_S@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+
+DESTDIR = @DESTDIR@
+
+AR = @AR@
+AR_FLAGS = qv
+RANLIB = @RANLIB@
+DLLTOOL = @DLLTOOL@
+WINDRES = @WINDRES@
+MIG = @MIG@
+STRIP = @STRIP@
+
+XGETTEXT = @XGETTEXT@
+GMSGFMT = @GMSGFMT@
+MSGMERGE = msgmerge
+
+PACKAGE = @PACKAGE@
+CATALOGS = @CATALOGS@
+
+CC = @CC@
+CXX = @CXX@
+CXX_DIALECT = @CXX_DIALECT@
+
+# Dependency tracking information.
+DEPMODE = @CCDEPMODE@
+DEPDIR = @DEPDIR@
+depcomp = $(SHELL) $(srcdir)/../../depcomp
+
+# Directory containing source files.
+srcdir = @srcdir@
+VPATH = $(srcdir):$(srcdir)/libkvm
+top_srcdir = @top_srcdir@
+
+# where to find makeinfo, preferably one designed for texinfo-2
+MAKEINFO = @MAKEINFO@
+
+# Set this up with gcc if you have gnu ld and the loader will print out
+# line numbers for undefined references.
+#CC_LD = g++ -static
+CC_LD = $(CXX) $(CXX_DIALECT)
+
+# Global include
+INCLUDE_DIR = $(srcdir)/../../include
+INCLUDE_CFLAGS = -I$(INCLUDE_DIR) -I../../
+
+BFD_DIR = ../../bfd
+BFD = $(BFD_DIR)/libbfd.a
+BFD_SRC = $(srcdir)/$(BFD_DIR)
+BFD_CFLAGS = -I$(BFD_DIR) -I$(BFD_SRC)
+
+# Helper code from gnulib.
+GNULIB_BUILDDIR = ../../gnulib
+LIBGNU = $(GNULIB_BUILDDIR)/import/libgnu.a
+INCGNU = -I$(srcdir)/../../gnulib/import -I$(GNULIB_BUILDDIR)/import
+
+LIBOPCODES = ../../opcodes/libopcodes.a
+LIBREADLINE = ../../readline/readline/libreadline.a
+LIBDECNUMBER = ../../libdecnumber/libdecnumber.a
+LIBZ = ../../zlib/libz.a
+LIBIBERTY = ../../libiberty/libiberty.a
+LIBCTF = ../../libctf/.libs/libctf.a
+LIBGDBSUPPORT = ../../gdbsupport/libgdbsupport.a
+LIBBACKTRACE = ../../libbacktrace/.libs/libbacktrace.a
+#LIBSIMARM = ../../sim/arm/libsim.a
+
+# Generated headers in the gnulib directory.  These must be listed
+# so that they are generated before other files are compiled.
+GNULIB_H = $(GNULIB_BUILDDIR)/import/string.h \
+	$(GNULIB_BUILDDIR)/import/alloca.h @GNULIB_STDINT_H@
+
+GDB_CFLAGS = -I.. -I$(srcdir)/.. -I$(srcdir)/../common -I$(srcdir)/../config -I$(srcdir)/../../
+
+KGDB_CFLAGS = -I$(srcdir) -I$(srcdir)/../../readline -I$(srcdir)/libbsd -I$(srcdir)/../../
+
+CFLAGS = @CFLAGS@
+CXXFLAGS = @CXXFLAGS@
+
+CONFIG_LDFLAGS = @CONFIG_LDFLAGS@
+GDB_SIM = @GDB_SIM@
+KGDB_CFLAGS_EXTRA = @KGDB_CFLAGS_EXTRA@
+
+# Note that these are overridden by GNU make-specific code below if
+# GNU make is used.  The overrides implement dependency tracking.
+COMPILE.pre = $(CXX) -x c++ $(CXX_DIALECT)
+COMPILE.post = -c -o $@
+COMPILE = $(ECHO_CXX) $(COMPILE.pre) $(INTERNAL_CFLAGS) $(COMPILE.post)
+POSTCOMPILE = @true
+
+INTERNAL_CFLAGS_BASE = $(CXXFLAGS) $(KGDB_CFLAGS) $(GDB_CFLAGS) \
+	$(INCGNU) $(INCLUDE_CFLAGS) $(BFD_CFLAGS)
+INTERNAL_CFLAGS = $(INTERNAL_CFLAGS_BASE)  $(KGDB_CFLAGS) $(KGDB_CFLAGS_EXTRA)
+
+LDFLAGS = @LDFLAGS@ @RDYNAMIC@
+
+GDBLIB_BUILDDIR = ..
+LIBGDB = $(GDBLIB_BUILDDIR)/libgdb.a
+
+CDEPS = $(LIBGNU) $(BFD)
+CLIBS = -Wl,--start-group $(LIBGNU) $(BFD) $(LIBOPCODES) $(LIBREADLINE) $(LIBDECNUMBER) $(LIBIBERTY) $(LIBCTF) $(LIBZ) $(LIBGDBSUPPORT) $(LIBBACKTRACE) $(LIBSIMARM) -Wl,--end-group
+
+KGDB_HOST_LDFLAGS = @KGDB_HOST_LDFLAGS@
+
+INTERNAL_LDFLAGS = $(CXXFLAGS) $(LDFLAGS) $(CONFIG_LDFLAGS)
+
+SUBDIRS = @KGDB_SUBDIRS@
+
+COMMON_OBJS = fbsd-kld.o fbsd-kthr.o fbsd-kvm.o
+KGDB_TARGET_OBJS = @KGDB_TARGET_OBJS@
+OBJS = $(COMMON_OBJS) $(KGDB_TARGET_OBJS)
+
+all: kgdb$(EXEEXT)
+
+kgdb-init.c:
+	@echo Making kgdb-init.c
+	@rm -f kgdb-init.l-tmp
+	LANG=C ; export LANG ; \
+	LC_ALL=C ; export LC_ALL ; \
+	echo $(OBJS) | \
+	sed -e 's/\.o/\.c/g' | \
+	tr ' ' '\012' | \
+	while read f; do \
+	if [ -f $(srcdir)/$$f ]; then \
+		sed -n -e 's/^_initialize_\([a-z_0-9A-Z]*\).*/\1/p' $(srcdir)/$$f; \
+	fi \
+	done >> kgdb-init.l-tmp
+	@echo '/* Do not modify this file.  */' >>kgdb-init.c-tmp
+	@echo '/* It is created automatically by the Makefile.  */'>>kgdb-init.c-tmp
+	@echo '#include "defs.h"      /* For initialize_file_ftype.  */' >>kgdb-init.c-tmp
+	@echo 'extern void initialize_all_kgdb_files(void);' >>kgdb-init.c-tmp
+	@sed -e 's/\(.*\)/extern initialize_file_ftype _initialize_\1;/' <kgdb-init.l-tmp >>kgdb-init.c-tmp
+	@echo 'void' >>kgdb-init.c-tmp
+	@echo 'initialize_all_kgdb_files (void)' >>kgdb-init.c-tmp
+	@echo '{' >>kgdb-init.c-tmp
+	@sed -e 's/\(.*\)/  _initialize_\1 ();/' <kgdb-init.l-tmp >>kgdb-init.c-tmp
+	@echo '}' >>kgdb-init.c-tmp
+	@rm kgdb-init.l-tmp
+	@mv kgdb-init.c-tmp kgdb-init.c
+
+kgdb-init.o: kgdb-init.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
+kgdb$(EXEEXT): kgdb-main.o $(KGDB_TARGET_OBJS) $(COMMON_OBJS) $(LIBGDB) $(CDEPS) kgdb-init.o $(SUBDIRS)
+	rm -f kgdb$(EXEEXT)
+	$(CC_LD) $(INTERNAL_LDFLAGS) -o kgdb$(EXEEXT) \
+	kgdb-main.o kgdb-init.o \
+	$(KGDB_TARGET_OBJS) $(COMMON_OBJS) $(LIBGDB) $(GDB_SIM) $(CLIBS) \
+	-lncurses  -lutil -lexpat $(KGDB_HOST_LDFLAGS)
+
+$(SUBDIRS): force
+	$(MAKE) -C $@
+
+%.o: %.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
+install: all
+	$(INSTALL_PROGRAM) kgdb$(EXEEXT) $(DESTDIR)$(bindir)/`echo kgdb | sed '$(program_transform_name)'`
+
+clean:
+	rm -f *.o *.a  *~ kgdb-init.c-tmp kgdb-init.l-tmp
+	rm -f kgdb-init.c
+	rm -f kgdb$(EXEEXT) make.log
+
+distclean: clean
+	rm -f config.log config.cache
+	rm -f Makefile
+
+force:

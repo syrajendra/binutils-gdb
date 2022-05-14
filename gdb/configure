@@ -963,7 +963,8 @@ YACC
 YFLAGS
 XMKMF'
 ac_subdirs_all='testsuite
-gdbtk'
+gdbtk
+kgdb'
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -8247,6 +8248,187 @@ fi
 
 
 
+
+
+# On FreeBSD we may need libutil for kinfo_getvmmap (used by fbsd-nat.c).
+# On GNU/kFreeBSD systems, FreeBSD libutil is renamed to libutil-freebsd.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing kinfo_getvmmap" >&5
+$as_echo_n "checking for library containing kinfo_getvmmap... " >&6; }
+if ${ac_cv_search_kinfo_getvmmap+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char kinfo_getvmmap ();
+int
+main ()
+{
+return kinfo_getvmmap ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' util util-freebsd; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_kinfo_getvmmap=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_kinfo_getvmmap+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_kinfo_getvmmap+:} false; then :
+else
+  ac_cv_search_kinfo_getvmmap=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_kinfo_getvmmap" >&5
+$as_echo "$ac_cv_search_kinfo_getvmmap" >&6; }
+ac_res=$ac_cv_search_kinfo_getvmmap
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+$as_echo "#define HAVE_KINFO_GETVMMAP 1" >>confdefs.h
+
+fi
+
+# fbsd-nat.c can also use kinfo_getfile.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing kinfo_getfile" >&5
+$as_echo_n "checking for library containing kinfo_getfile... " >&6; }
+if ${ac_cv_search_kinfo_getfile+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char kinfo_getfile ();
+int
+main ()
+{
+return kinfo_getfile ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' util util-freebsd; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_kinfo_getfile=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_kinfo_getfile+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_kinfo_getfile+:} false; then :
+
+else
+  ac_cv_search_kinfo_getfile=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_kinfo_getfile" >&5
+$as_echo "$ac_cv_search_kinfo_getfile" >&6; }
+ac_res=$ac_cv_search_kinfo_getfile
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+$as_echo "#define HAVE_KINFO_GETFILE 1" >>confdefs.h
+
+fi
+
+
+# kgdb needs kvm_open2 for cross-debugging
+
+# kgdb needs kvm_kerndisp for relocatable kernels
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing kvm_kerndisp" >&5
+$as_echo_n "checking for library containing kvm_kerndisp... " >&6; }
+if ${ac_cv_search_kvm_kerndisp+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char kvm_kerndisp ();
+int
+main ()
+{
+return kvm_kerndisp ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' kvm; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_kvm_kerndisp=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_kvm_kerndisp+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_kvm_kerndisp+:} false; then :
+
+else
+  ac_cv_search_kvm_kerndisp=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_kvm_kerndisp" >&5
+$as_echo "$ac_cv_search_kvm_kerndisp" >&6; }
+ac_res=$ac_cv_search_kvm_kerndisp
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+$as_echo "#define HAVE_KVM_DISP 1" >>confdefs.h
+
+fi
 
 
 
@@ -18845,8 +19027,37 @@ else
   LIBBACKTRACE_LIB=
 fi
 
+# KGDB part
+case "$target" in
+  aarch64*-*-freebsd*)                         fbsd_trgt="yes" ;;
+  arm*-*-freebsd*)                             fbsd_trgt="yes" ;;
+  i*86-*-freebsd* | i*86-*-kfreebsd*-gnu)      fbsd_trgt="yes" ;;
+  mips64*-*-freebsd*)                          fbsd_trgt="yes" ;;
+  mips*-*-freebsd*)                            fbsd_trgt="yes" ;;
+  powerpc64*-*-freebsd*)                       fbsd_trgt="yes" ;;
+  powerpc*-*-freebsd*)                         fbsd_trgt="yes" ;;
+  x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)  fbsd_trgt="yes" ;;
+  *)                                           fbsd_trgt="no"  ;;
+esac
 
+if test "$fbsd_trgt" = "yes"; then
 
+$as_echo "#define FBSD_TRGT 1" >>confdefs.h
+
+  configure_kgdb="yes"
+fi
+
+case "$host_alias" in
+  i*86-*-freebsd* | i*86-*-kfreebsd*-gnu) configure_kgdb="no" ;;
+  *freebsd*) ;;
+  *linux*) ;;
+  *) configure_kgdb="no" ;;
+esac
+
+if test "$configure_kgdb" = "yes"; then
+  subdirs="$subdirs kgdb"
+
+fi
 
 # Check for babeltrace and babeltrace-ctf
 
@@ -18922,7 +19133,6 @@ if test "${with_libbabeltrace_prefix+set}" = set; then :
     fi
 
 fi
-
 
 # Check whether --with-libbabeltrace-type was given.
 if test "${with_libbabeltrace_type+set}" = set; then :
