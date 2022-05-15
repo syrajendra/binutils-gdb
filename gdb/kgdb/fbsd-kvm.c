@@ -145,8 +145,14 @@ kgdb_dmesg(void)
 	} catch (const gdb_exception_error &e) {
 		return;
 	}
-	if (size == 0)
+
+    /* JUNOS: make sure 'size' is not 0 to avoid FP exception in
+     *  MSGBUF_SEQ_TO_POS when there's no debug info in the kernel and
+     *  kgdb_parse() returns 0 for msgbufp->msg_size.
+     */
+	if (bufp == 0 || size == 0)
 		return;
+
 	rseq = MSGBUF_SEQ_TO_POS(size, rseq);
 	wseq = MSGBUF_SEQ_TO_POS(size, wseq);
 	if (rseq == wseq)
