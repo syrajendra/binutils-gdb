@@ -89,7 +89,7 @@ usage(void)
 
 	fprintf(stderr,
 	    "usage: %s [-afqvw] [-b rate] [-d crashdir] [-c core | -n dumpnr | -r device]\n"
-	    "\t[-interpreter=mi] [-x command_file] [kernel [core]]\n", getprogname());
+	    "\t[-batch] [-interpreter=mi] [-x command_file] [kernel [core]]\n", getprogname());
 	exit(1);
 }
 
@@ -242,6 +242,8 @@ main(int argc, char *argv[])
 				argv[a] = (char *)"-q";
 			else if (strcmp(s, "fullname") == 0)
 				argv[a] = (char *)"-f";
+            else if (strcmp(s, "batch") == 0)
+                argv[a] = (char *)"-B";
             else if (strcmp(s, "interpreter") == 0)
                 argv[a] = (char *)"-N";
 		}
@@ -253,11 +255,15 @@ main(int argc, char *argv[])
 	args.argv = (char **)xmalloc(sizeof(char *));
 	args.argv[0] = argv[0];
 
-	while ((ch = getopt(argc, argv, "ab:c:d:fN:n:qr:vwx:")) != -1) {
+	while ((ch = getopt(argc, argv, "aBb:c:d:fN:n:qr:vwx:")) != -1) {
 		switch (ch) {
 		case 'a':
 			annotation_level++;
 			break;
+        case 'B':
+            kgdb_quiet = 1;
+            add_arg(&args, "-batch");
+            break;
 		case 'b': {
 			int i;
 			char *p;
