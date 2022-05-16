@@ -122,6 +122,21 @@ amd64fbsd_init_pcb()
 }
 
 static void
+amd64fbsd_print_pcb_offsets()
+{
+  printf("=============Register Offsets=============\n");
+  printf("RBX=>%d\n", amd64fbsd_pcb_offset[IDX_AMD64_RBX]);
+  printf("RBP=>%d\n", amd64fbsd_pcb_offset[IDX_AMD64_RBP]);
+  printf("RSP=>%d\n", amd64fbsd_pcb_offset[IDX_AMD64_RSP]);
+  printf("R12=>%d\n", amd64fbsd_pcb_offset[IDX_AMD64_R12]);
+  printf("R13=>%d\n", amd64fbsd_pcb_offset[IDX_AMD64_R13]);
+  printf("R14=>%d\n", amd64fbsd_pcb_offset[IDX_AMD64_R14]);
+  printf("R15=>%d\n", amd64fbsd_pcb_offset[IDX_AMD64_R15]);
+  printf("RIP=>%d\n", amd64fbsd_pcb_offset[IDX_AMD64_RIP]);
+  printf("==========================================\n");
+}
+
+static void
 amd64fbsd_supply_pcb(struct regcache *regcache, CORE_ADDR pcb_addr)
 {
   gdb_byte buf[8];
@@ -284,6 +299,7 @@ amd64fbsd_kernel_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
 	set_solib_ops(gdbarch, &kld_so_ops);
 
 	fbsd_vmcore_set_init_pcb(gdbarch, amd64fbsd_init_pcb);
+	fbsd_vmcore_set_print_pcb_offsets(gdbarch, amd64fbsd_print_pcb_offsets);
 	fbsd_vmcore_set_supply_pcb(gdbarch, amd64fbsd_supply_pcb);
 	fbsd_vmcore_set_cpu_pcb_addr(gdbarch, kgdb_trgt_stop_pcb);
 }

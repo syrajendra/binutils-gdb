@@ -108,6 +108,7 @@ kgdb_thr_add_proc(CORE_ADDR paddr, CORE_ADDR (*cpu_pcb_addr) (u_int))
 		    ptr_type);
 		pid = read_memory_integer (paddr + proc_off_p_pid, 4, byte_order);
 	} catch (const gdb_exception_error &e) {
+        if (jverbose) printf("[FAILED] at &proc=0x%" PRIx64 "\n", paddr);
 		return;
 	}
 
@@ -122,6 +123,10 @@ kgdb_thr_add_proc(CORE_ADDR paddr, CORE_ADDR (*cpu_pcb_addr) (u_int))
 			tdnext = read_memory_typed_address (tdaddr +
 			    thread_off_td_plist, ptr_type);
 		} catch (const gdb_exception_error &e) {
+            if (jverbose)
+                printf("[FAILED] at &proc=0x%" PRIx64
+                        " pid=%d &thr=0x%" PRIx64 "\n",
+                        paddr, pid, tdaddr);
 			return;
 		}
 		kt = XNEW (struct kthr);
@@ -131,12 +136,25 @@ kgdb_thr_add_proc(CORE_ADDR paddr, CORE_ADDR (*cpu_pcb_addr) (u_int))
 			last->next = kt;
 		kt->next = NULL;
 		kt->kaddr = tdaddr;
-		if (tid == dumptid)
+		if (tid == dumptid) {
+			if (jverbose)
+			  printf("[DUMPTHR] &proc=0x%" PRIx64 " pid=%d &thr=0x%" PRIx64
+					 " tid=%d oncpu=%d origpcb=0x%" PRIx64 " newpcb=0x%" PRIx64
+					 "\n", paddr, pid, tdaddr, tid, oncpu, pcb, dumppcb);
 			kt->pcb = dumppcb;
-		else if (cpu_stopped(oncpu))
+        } else if (cpu_stopped(oncpu)) {
+			if (jverbose)
+			  printf("[STOPPEDTHR] &proc=0x%" PRIx64 " pid=%d &thr=0x%" PRIx64
+					 " tid=%d oncpu=%d origpcb=0x%" PRIx64 " newpcb=0x%" PRIx64
+					 "\n", paddr, pid, tdaddr, tid, oncpu, pcb, cpu_pcb_addr(oncpu));
 			kt->pcb = cpu_pcb_addr(oncpu);
-		else
+        } else {
+			if (jverbose)
+			  printf("&proc=0x%" PRIx64 " pid=%d &thr=0x%" PRIx64
+					 " tid=%d oncpu=%d pcb=0x%" PRIx64
+					 "\n", paddr, pid, tdaddr, tid, oncpu, pcb);
 			kt->pcb = pcb;
+        }
 		kt->tid = tid;
 		kt->pid = pid;
 		kt->paddr = paddr;
@@ -212,6 +230,11 @@ kgdb_thr_init(CORE_ADDR (*cpu_pcb_addr) (u_int))
 	last = NULL;
 
 	dumppcb = parse_and_eval_address("&dumppcb");
+	if (jverbose) {
+		printf("================THREAD INFO==============\n");
+		printf("&allproc=0x%" PRIx64 "\n", addr);
+		printf("&dumppcb=0x%" PRIx64 "\n", dumppcb);
+	}
 	if (dumppcb == 0)
 		return (NULL);
 
@@ -219,6 +242,11 @@ kgdb_thr_init(CORE_ADDR (*cpu_pcb_addr) (u_int))
 		dumptid = parse_and_eval_long("dumptid");
 	} catch (const gdb_exception_error &e) {
 		dumptid = -1;
+	}
+ 
+   if (jverbose) {
+		printf("dumptid=%d\n", dumptid);
+		printf("==>Active Process List<==\n");
 	}
 
 	try {
@@ -326,6 +354,9 @@ kgdb_thr_init(CORE_ADDR (*cpu_pcb_addr) (u_int))
 		}
 	}
 
+	if (jverbose) {
+		printf("==>Zombie Process List<==\n");
+	}
 	addr = kgdb_lookup("zombproc");
 	if (addr != 0) {
 		addr = kgdb_lookup("allproc");
@@ -353,6 +384,8 @@ kgdb_thr_init(CORE_ADDR (*cpu_pcb_addr) (u_int))
 	curkthr = kgdb_thr_lookup_tid(dumptid);
 	if (curkthr == NULL)
 		curkthr = first;
+    if (jverbose)
+		printf("=========================================\n");
 	return (first);
 }
 

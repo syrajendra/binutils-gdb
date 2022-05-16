@@ -96,6 +96,9 @@ int batch_silent = 0;
 int return_child_result = 0;
 int return_child_result_value = -1;
 
+/* Enable Juniper specific verbose */
+int jverbose = 0;
+int jverbose_print_fileoff = 0;
 
 /* GDB as it has been invoked from the command line (i.e. argv[0]).  */
 static char *gdb_program_name;
@@ -835,6 +838,7 @@ captured_main_1 (struct captured_main_args *context)
       {"args", no_argument, &set_args, 1},
       {"l", required_argument, 0, 'l'},
       {"return-child-result", no_argument, &return_child_result, 1},
+      {"jverbose", no_argument, 0, 'V'},
       {0, no_argument, 0, 0}
     };
 
@@ -997,6 +1001,10 @@ captured_main_1 (struct captured_main_args *context)
 		remote_timeout = timeout;
 	    }
 	    break;
+
+      case 'V':
+        jverbose = 1;
+        break;
 
 	  case OPT_READNOW:
 	    {

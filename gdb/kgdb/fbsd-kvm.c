@@ -61,6 +61,9 @@ struct fbsd_vmcore_ops
   /* Some arch requires the right PCB offsets to be initiated */
   void (*init_pcb)(void);
 
+  /* For debugging purpose */
+  void (*print_pcb_offsets)(void);
+
   /* Supply registers for a pcb to a register cache.  */
   void (*supply_pcb)(struct regcache *, CORE_ADDR);
 
@@ -85,6 +88,15 @@ fbsd_vmcore_set_init_pcb (struct gdbarch *gdbarch,
     gdbarch_data (gdbarch, fbsd_vmcore_data);
   ops->init_pcb = init_pcb;
 }
+
+void fbsd_vmcore_set_print_pcb_offsets (struct gdbarch *gdbarch,
+                            void (*print_pcb_offsets)(void))
+{
+      struct fbsd_vmcore_ops *ops = (struct fbsd_vmcore_ops *)
+              gdbarch_data (gdbarch, fbsd_vmcore_data);
+        ops->print_pcb_offsets = print_pcb_offsets;
+}
+
 
 /* Set the function that supplies registers from a pcb
    for architecture GDBARCH to SUPPLY_PCB.  */
@@ -436,6 +448,17 @@ fbsd_kvm_target_open (const char *args, int from_tty)
 
 	reinit_frame_cache ();
 	print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC, 1);
+    if (jverbose) {
+		CORE_ADDR msgbufp;
+		printf("================KGDB loaded===============\n");
+		msgbufp = parse_and_eval_address("msgbufp");
+		printf("msgbufp = 0x%" PRIx64 "\n", msgbufp);
+		printf("kernstart = 0x%" PRIx64 "\n", kernstart);
+		printf("pcb_size = %d\n", pcb_size);
+		printf("==========================================\n");
+		if (ops->print_pcb_offsets)
+			ops->print_pcb_offsets();
+	}
 }
 
 void
@@ -554,6 +577,8 @@ fbsd_kvm_target::fetch_registers(struct regcache *regcache, int regnum)
 	if (kt == NULL)
 		return;
 	ops->supply_pcb(regcache, kt->pcb);
+	if (jverbose)
+		printf("(thrpcb=0x%" PRIx64 ")\n", kt->pcb);
 }
 
 enum target_xfer_status

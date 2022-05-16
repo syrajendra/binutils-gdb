@@ -56,6 +56,19 @@ static const struct regset arm_fbsd_pcbregset =
   };
 
 static void
+armfbsd_print_pcb_offsets()
+{
+  int i, off = 0;
+  printf("=============Register Offsets=============\n");
+  for (i = ARM_A4_REGNUM+1; i <= ARM_IP_REGNUM; i++, off++)
+    printf("R%d=>%d\n", i, off * 4);
+  printf("SP=>%d\n", off++ * 4);
+  printf("LR=>%d\n", off++ * 4);
+  printf("PC=>%d\n", off++ * 4);
+  printf("==========================================\n");
+}
+
+static void
 arm_fbsd_supply_pcb(struct regcache *regcache, CORE_ADDR pcb_addr)
 {
   gdb_byte buf[4 * 12];
@@ -192,6 +205,7 @@ arm_fbsd_kernel_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->jb_pc = 24;
   tdep->jb_elt_size = 4;
 
+  fbsd_vmcore_set_print_pcb_offsets(gdbarch, armfbsd_print_pcb_offsets);
   fbsd_vmcore_set_supply_pcb (gdbarch, arm_fbsd_supply_pcb);
   fbsd_vmcore_set_cpu_pcb_addr (gdbarch, kgdb_trgt_stop_pcb);
 

@@ -157,6 +157,19 @@ i386fbsd_init_pcb()
 }
 
 static void
+i386fbsd_print_pcb_offsets()
+{
+  printf("=============Register Offsets=============\n");
+  printf("EBX=>%d\n", i386fbsd_pcb_offset[IDX_X86_EBX]);
+  printf("ESP=>%d\n", i386fbsd_pcb_offset[IDX_X86_ESP]);
+  printf("EBP=>%d\n", i386fbsd_pcb_offset[IDX_X86_EBP]);
+  printf("ESI=>%d\n", i386fbsd_pcb_offset[IDX_X86_ESI]);
+  printf("EDI=>%d\n", i386fbsd_pcb_offset[IDX_X86_EDI]);
+  printf("EIP=>%d\n", i386fbsd_pcb_offset[IDX_X86_EIP]);
+  printf("==========================================\n");
+}
+
+static void
 i386fbsd_supply_pcb(struct regcache *regcache, CORE_ADDR pcb_addr)
 {
   gdb_byte buf[4];
@@ -500,6 +513,7 @@ i386fbsd_kernel_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
 	set_solib_ops(gdbarch, &kld_so_ops);
 
 	fbsd_vmcore_set_init_pcb(gdbarch, i386fbsd_init_pcb);
+	fbsd_vmcore_set_print_pcb_offsets(gdbarch, i386fbsd_print_pcb_offsets);
 	fbsd_vmcore_set_supply_pcb(gdbarch, i386fbsd_supply_pcb);
 	fbsd_vmcore_set_cpu_pcb_addr(gdbarch, kgdb_trgt_stop_pcb);
 }

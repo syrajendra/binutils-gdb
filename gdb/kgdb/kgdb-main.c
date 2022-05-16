@@ -88,9 +88,8 @@ usage(void)
 {
 
 	fprintf(stderr,
-	    "usage: %s [-afqvw] [-b rate] [-d crashdir] [-c core | -n dumpnr | -r device]\n"
+	    "usage: %s [-Vafqvw] [-b rate] [-d crashdir] [-c core | -n dumpnr | -r device]\n"
 	    "\t[-batch] [-interpreter=mi] [-x command_file] [kernel [core]]\n", getprogname());
-	exit(1);
 }
 
 static void
@@ -255,7 +254,7 @@ main(int argc, char *argv[])
 	args.argv = (char **)xmalloc(sizeof(char *));
 	args.argv[0] = argv[0];
 
-	while ((ch = getopt(argc, argv, "aBb:c:d:fN:n:qr:vwx:")) != -1) {
+	while ((ch = getopt(argc, argv, "aBb:c:d:fN:n:qr:vwx:Vh")) != -1) {
 		switch (ch) {
 		case 'a':
 			annotation_level++;
@@ -281,6 +280,7 @@ main(int argc, char *argv[])
 				warnx("option %c: can only be specified once",
 				    optopt);
 				usage();
+                exit(1);
 				/* NOTREACHED */
 			}
 			vmcore = strdup(optarg);
@@ -291,6 +291,11 @@ main(int argc, char *argv[])
 		case 'f':
 			annotation_level = 1;
 			break;
+        case 'h':
+            usage();
+            exit(0);
+            /* NOTREACHED */
+            break;
         case 'N':
             interpr = strdup(optarg);
             add_arg(&args, "-interpreter");
@@ -308,6 +313,7 @@ main(int argc, char *argv[])
 				warnx("option %c: can only be specified once",
 				    optopt);
 				usage();
+                exit(1);
 				/* NOTREACHED */
 			}
 			remote = strdup(optarg);
@@ -315,6 +321,9 @@ main(int argc, char *argv[])
 		case 'v':	/* increase verbosity. */
 			verbose++;
 			break;
+        case 'V':       /* Enable gdb jverbose */
+            add_arg(&args, "-jverbose");
+            break;
 		case 'w':	/* core file is writeable. */
 			writeable = 1;
 			break;
@@ -323,6 +332,7 @@ main(int argc, char *argv[])
 				warnx("option %c: can only be specified once",
 				    optopt);
 				usage();
+                exit(1);
 				/* NOTREACHED */
 			}
 			command_file = strdup(optarg);
@@ -332,6 +342,7 @@ main(int argc, char *argv[])
 		case '?':
 		default:
 			usage();
+            exit(1);
 		}
 	}
 
@@ -339,6 +350,7 @@ main(int argc, char *argv[])
 	    ((remote != NULL) ? 1 : 0) > 1) {
 		warnx("options -c, -n and -r are mutually exclusive");
 		usage();
+        exit(1);
 		/* NOTREACHED */
 	}
 
@@ -385,6 +397,7 @@ main(int argc, char *argv[])
 	if (remote != NULL && kernel == NULL) {
 		warnx("remote debugging requires a kernel");
 		usage();
+        exit(1);
 		/* NOTREACHED */
 	}
 

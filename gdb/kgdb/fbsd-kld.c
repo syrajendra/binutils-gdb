@@ -174,6 +174,9 @@ find_kld_path (const char *filename)
       if (module_path != nullptr)
 	{
 	  char *cp = module_path.get();
+      if (jverbose)
+          printf_unfiltered("Got module_path %s in addr 0x%lx\n",
+                             cp, info->module_path_addr);
 	  char *module_dir;
 	  while ((module_dir = strsep(&cp, ";")) != NULL)
 	    {
@@ -181,7 +184,11 @@ find_kld_path (const char *filename)
 	      if (check_kld_path (path))
 		return path;
 	    }
-	}
+	} else {
+      if (jverbose)
+        printf_unfiltered("Unable to get module_path in addr 0x%lx\n",
+                                              info->module_path_addr);
+    }
     }
 
   return {};
@@ -224,9 +231,17 @@ find_kld_address (const char *arg, CORE_ADDR *address)
 		gdb::unique_xmalloc_ptr<char> kld_filename =
 		    target_read_string (read_pointer (kld + info->off_filename),
 		    PATH_MAX);
-		if (kld_filename == nullptr)
+		if (kld_filename == nullptr) {
+            if (jverbose)
+                printf_unfiltered("Unable to get kld_filename for addr %p\n",
+                        read_pointer(kld + info->off_filename));
 			continue;
+        }
 
+        if (jverbose)
+            printf_unfiltered("Got kld_filename = %s from addr %p\n",
+                            kld_filename.get(),
+                            read_pointer(kld + info->off_filename));
 		/* Compare this kld's filename against our passed in name. */
 		if (strcmp(kld_filename.get (), filename) != 0)
 			continue;
@@ -289,10 +304,15 @@ load_kld (const char *path, CORE_ADDR base_addr, int from_tty)
 	    = build_section_addr_info_from_section_table (sections);
 
 	printf_unfiltered("add symbol table from file \"%s\" at\n", path);
-	for (const other_sections &s : sap)
-		printf_unfiltered("\t%s_addr = %s\n", s.name.c_str(),
-		    paddress(target_gdbarch(), s.addr));
-
+	for (const other_sections &s : sap) {
+        if (jverbose)
+            printf_unfiltered("\tidx[%d] %s_addr = %s\n",
+                              s.sectindex, s.name.c_str(),
+                              paddress(target_gdbarch(), s.addr));
+        else
+		    printf_unfiltered("\t%s_addr = %s\n", s.name.c_str(),
+		        paddress(target_gdbarch(), s.addr));
+    }
 	if (from_tty && (!query("%s", "")))
 		error("Not confirmed.");
 

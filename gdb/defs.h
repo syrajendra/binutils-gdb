@@ -326,6 +326,10 @@ extern int input_interactive_p (struct ui *);
 
 extern bool info_verbose;
 
+extern int jverbose;
+
+extern int jverbose_print_fileoff;
+
 /* From printcmd.c */
 
 extern void set_next_address (struct gdbarch *, CORE_ADDR);

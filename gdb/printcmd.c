@@ -1450,7 +1450,10 @@ print_command_completer (struct cmd_list_element *ignore,
 static void
 print_command (const char *exp, int from_tty)
 {
+  if (jverbose)
+      jverbose_print_fileoff = 1;
   print_command_1 (exp, true);
+  jverbose_print_fileoff = 0;
 }
 
 /* Same as print, except it doesn't print void results.  */
@@ -1900,7 +1903,10 @@ x_command (const char *exp, int from_tty)
   if (!next_gdbarch)
     error_no_arg (_("starting display address"));
 
+  if (jverbose)
+      jverbose_print_fileoff = 1;
   do_examine (fmt, next_gdbarch, next_address);
+  jverbose_print_fileoff = 0;
 
   /* If the examine succeeds, we remember its size and format for next
      time.  Set last_size to 'b' for strings.  */
