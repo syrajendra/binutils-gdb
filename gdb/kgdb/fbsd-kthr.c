@@ -423,13 +423,15 @@ kgdb_thr_extra_thread_info(int tid)
       strlcat(buf, ": ", sizeof (buf));
       strlcat(buf, comm.get (), sizeof (buf));
 
-      gdb::unique_xmalloc_ptr<char> td_name
-	= target_read_string (kt->kaddr + thread_off_td_name, MAXCOMLEN + 1);
-      if (td_name != nullptr && strcmp (comm.get (), td_name.get ()) != 0)
-	{
-	  strlcat(buf, "/", sizeof (buf));
-	  strlcat(buf, td_name.get (), sizeof (buf));
-	}
+     if (thread_off_td_name != -1) {
+       gdb::unique_xmalloc_ptr<char> td_name
+       = target_read_string (kt->kaddr + thread_off_td_name, MAXCOMLEN + 1);
+       if (td_name != nullptr && strcmp (comm.get (), td_name.get ()) != 0)
+       {
+         strlcat(buf, "/", sizeof (buf));
+         strlcat(buf, td_name.get (), sizeof (buf));
+       }
+     }
     }
   return (buf);
 }
