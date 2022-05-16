@@ -211,7 +211,7 @@ kgdb_thr_init(CORE_ADDR (*cpu_pcb_addr) (u_int))
 	}
 	last = NULL;
 
-	dumppcb = kgdb_lookup("dumppcb");
+	dumppcb = parse_and_eval_address("&dumppcb");
 	if (dumppcb == 0)
 		return (NULL);
 
