@@ -89,7 +89,7 @@ usage(void)
 
 	fprintf(stderr,
 	    "usage: %s [-Vafqvw] [-b rate] [-d crashdir] [-c core | -n dumpnr | -r device]\n"
-	    "\t[-batch] [-interpreter=mi] [-x command_file] [kernel [core]]\n", getprogname());
+	    "\t[-batch] [-interpreter mi] [-x command_file] [kernel [core]]\n", getprogname());
 }
 
 static void
