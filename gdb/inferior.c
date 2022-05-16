@@ -631,7 +631,10 @@ void
 switch_to_inferior_no_thread (inferior *inf)
 {
   set_current_inferior (inf);
+#if !defined(FBSD_TRGT) && !defined(__FreeBSD__)
+  /* PR: 1629420 [Confidential] - Fix breakpoint in pthread */
   switch_to_no_thread ();
+#endif
   set_current_program_space (inf->pspace);
 }
 
