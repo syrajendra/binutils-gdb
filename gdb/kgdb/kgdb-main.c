@@ -66,6 +66,7 @@ static char *kernel;
 static char *remote;
 static char *vmcore;
 static char *command_file;
+static char *interpr;
 
 /*
  * TODO:
@@ -88,7 +89,7 @@ usage(void)
 
 	fprintf(stderr,
 	    "usage: %s [-afqvw] [-b rate] [-d crashdir] [-c core | -n dumpnr | -r device]\n"
-	    "\t[-x command_file] [kernel [core]]\n", getprogname());
+	    "\t[-interpreter=mi] [-x command_file] [kernel [core]]\n", getprogname());
 	exit(1);
 }
 
@@ -241,6 +242,8 @@ main(int argc, char *argv[])
 				argv[a] = (char *)"-q";
 			else if (strcmp(s, "fullname") == 0)
 				argv[a] = (char *)"-f";
+            else if (strcmp(s, "interpreter") == 0)
+                argv[a] = (char *)"-N";
 		}
 	}
 
@@ -250,7 +253,7 @@ main(int argc, char *argv[])
 	args.argv = (char **)xmalloc(sizeof(char *));
 	args.argv[0] = argv[0];
 
-	while ((ch = getopt(argc, argv, "ab:c:d:fn:qr:vwx:")) != -1) {
+	while ((ch = getopt(argc, argv, "ab:c:d:fN:n:qr:vwx:")) != -1) {
 		switch (ch) {
 		case 'a':
 			annotation_level++;
@@ -282,6 +285,11 @@ main(int argc, char *argv[])
 		case 'f':
 			annotation_level = 1;
 			break;
+        case 'N':
+            interpr = strdup(optarg);
+            add_arg(&args, "-interpreter");
+            add_arg(&args, interpr);
+            break;
 		case 'n':	/* use dump with given number. */
 			dumpnr = optarg;
 			break;
