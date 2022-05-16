@@ -125,6 +125,33 @@ check_kld_path (std::string &path)
 static gdb::optional<std::string>
 find_kld_path (const char *filename)
 {
+  char *kld_env;
+  if ((kld_env = getenv("KGDB_KLD_PATH")) != NULL) {
+    std::string kld_dir;
+    char tmp_path[PATH_MAX];
+    std::string kld_path(kld_env);
+
+    strncpy(tmp_path, filename, PATH_MAX - 1);
+    tmp_path[PATH_MAX - 1] = '\0';
+
+    while (!kld_path.empty()) {
+      size_t p = 0;
+      if ((p = kld_path.find(":")) != std::string::npos) {
+        kld_dir = kld_path.substr(0, p);
+        p = p + 1;
+      } else {
+        kld_dir = kld_path;
+        p = kld_path.size();
+      }
+      std::string path = string_printf("%s/%s", kld_dir.c_str(),
+                                       basename(tmp_path));
+      if (check_kld_path (path)) {
+        return path;
+      }
+      kld_path.erase(0, p);
+    }
+  }
+
   bfd *exec_bfd = current_program_space->exec_bfd ();
   if (exec_bfd != nullptr)
     {
