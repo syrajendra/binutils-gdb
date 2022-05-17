@@ -242,8 +242,11 @@ arm_fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
   target_fetch_registers (regcache, tdep->tls_regnum);
 
   ULONGEST tpidruro;
-  if (regcache->cooked_read (tdep->tls_regnum, &tpidruro) != REG_VALID)
-    error (_("Unable to fetch %%tpidruro"));
+  if (regcache->cooked_read (tdep->tls_regnum, &tpidruro) != REG_VALID) {
+    /* error (_("Unable to fetch %%tpidruro")); */
+    /* If default way fails use fallback approach to fetch TLS */
+    return fbsd_get_thread_local_address_fallback(gdbarch, ptid, lm_addr, offset);
+  }
 
   /* %tpidruro points to the TCB whose first member is the dtv
       pointer.  */

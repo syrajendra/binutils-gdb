@@ -289,8 +289,11 @@ amd64fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
   target_fetch_registers (regcache, AMD64_FSBASE_REGNUM);
 
   ULONGEST fsbase;
-  if (regcache->cooked_read (AMD64_FSBASE_REGNUM, &fsbase) != REG_VALID)
-    error (_("Unable to fetch %%fsbase"));
+  if (regcache->cooked_read (AMD64_FSBASE_REGNUM, &fsbase) != REG_VALID) {
+    /* error (_("Unable to fetch %%fsbase")); */
+    /* If default way fails use fallback approach to fetch TLS */
+    return fbsd_get_thread_local_address_fallback(gdbarch, ptid, lm_addr, offset);
+  }
 
   CORE_ADDR dtv_addr = fsbase + gdbarch_ptr_bit (gdbarch) / 8;
   return fbsd_get_thread_local_address (gdbarch, dtv_addr, lm_addr, offset);

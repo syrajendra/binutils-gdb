@@ -534,6 +534,13 @@ mips_fbsd_lp64_fetch_link_map_offsets (void)
   return lmp;
 }
 
+static CORE_ADDR
+mips_fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
+                                    CORE_ADDR lm_addr, CORE_ADDR offset)
+{
+    return fbsd_get_thread_local_address_fallback(gdbarch, ptid, lm_addr, offset);
+}
+
 static void
 mips_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -567,6 +574,12 @@ mips_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, (gdbarch_ptr_bit (gdbarch) == 32 ?
 	       mips_fbsd_ilp32_fetch_link_map_offsets :
 	       mips_fbsd_lp64_fetch_link_map_offsets));
+
+  /* Enable TLS support */
+  set_gdbarch_fetch_tls_load_module_address (gdbarch,
+                                             svr4_fetch_objfile_link_map);
+  set_gdbarch_get_thread_local_address (gdbarch,
+                                        mips_fbsd_get_thread_local_address);
 }
 
 void _initialize_mips_fbsd_tdep ();

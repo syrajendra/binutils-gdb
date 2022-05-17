@@ -2402,3 +2402,165 @@ _initialize_fbsd_tdep ()
   fbsd_gdbarch_data_handle =
     gdbarch_data_register_post_init (init_fbsd_gdbarch_data);
 }
+
+static CORE_ADDR list_addr;
+int off_dtv, off_tlsindex, off_tcb, off_tid, off_linkmap, off_next;
+static int
+sym_lookup (struct gdbarch *gdbarch, const char* sym_name, CORE_ADDR* sym_addr)
+{
+  struct bound_minimal_symbol ms;
+  CORE_ADDR addr;
+
+  gdb_assert (sym_name && sym_addr);
+  ms = lookup_bound_minimal_symbol (sym_name);
+  if (ms.minsym == NULL)
+    return 1;
+
+  addr = BMSYMBOL_VALUE_ADDRESS (ms);
+  store_unsigned_integer((gdb_byte *) sym_addr,
+			 TYPE_LENGTH(builtin_type (gdbarch)->builtin_data_ptr),
+			 BFD_ENDIAN_LITTLE, /* FIXME: change it to host endian */
+			 addr);
+  return 0;
+}
+
+static void
+init_core_threads (struct gdbarch *gdbarch)
+{
+#define LOOKUP_SYM(name, address)		\
+  if (sym_lookup (gdbarch, name, address) == 1)	\
+    goto error;
+
+#define LOOKUP_VAL(name, val)					\
+  sym_addr = 0;							\
+  memset(buf, '\0', sizeof(int));				\
+  if (sym_lookup (gdbarch, name, &sym_addr) == 1)		\
+    goto error;							\
+  err = target_read_memory (sym_addr, buf, sizeof(int));	\
+  if (err != 0 ) goto error;					\
+  *val = extract_signed_integer (buf, sizeof(int), byte_order);
+
+  CORE_ADDR sym_addr;
+  gdb_byte buf[sizeof(int)];
+  int err;
+
+  /* freebsd repo lib/libthread_db/libpthread_db.c */
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  LOOKUP_SYM("_thread_list", &list_addr);
+  LOOKUP_VAL("_thread_off_dtv", &off_dtv);
+  LOOKUP_VAL("_thread_off_tlsindex", &off_tlsindex);
+  LOOKUP_VAL("_thread_off_tcb", &off_tcb);
+  LOOKUP_VAL("_thread_off_tid", &off_tid);
+  LOOKUP_VAL("_thread_off_linkmap", &off_linkmap);
+  LOOKUP_VAL("_thread_off_next", &off_next);
+
+  return;
+
+ error:
+  throw_error (TLS_GENERIC_ERROR, _("TLS not supported on this target"));
+}
+
+static CORE_ADDR
+find_thread_info(struct gdbarch *gdbarch, int pid)
+{
+  CORE_ADDR thr_list;
+  long lwp;
+  gdb_byte buf[sizeof(CORE_ADDR)];
+  int tgt_long_size = builtin_type (gdbarch)->builtin_long->length;
+  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  if (target_read_memory (list_addr, buf, ptr_type->length))
+    return 0;
+  thr_list = extract_typed_address (buf, ptr_type);
+
+  while (thr_list != 0) {
+    if (target_read_memory (thr_list + off_tid, buf, tgt_long_size))
+      return 0;
+    lwp = extract_signed_integer (buf, tgt_long_size, byte_order);
+    if (lwp == pid)
+      return thr_list;
+
+    if (target_read_memory (thr_list + off_next, buf, ptr_type->length))
+      return 0;
+    thr_list = extract_typed_address (buf, ptr_type);
+  }
+  return 0;
+}
+
+CORE_ADDR
+fbsd_get_thread_local_address_fallback (struct gdbarch *gdbarch,
+					ptid_t ptid,
+					CORE_ADDR lm,
+					CORE_ADDR offset)
+{
+  gdb_byte buf[sizeof(CORE_ADDR)];
+  CORE_ADDR thr, obj_entry, tcb_addr, dtv_addr, tls_addr;
+  int tls_index;
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
+
+  init_core_threads (gdbarch);
+  thr = find_thread_info (gdbarch, ptid.lwp());
+  if (thr == 0)
+    throw_error (TLS_GENERIC_ERROR, _("Can't find thread"));
+
+  if (lm != 0x0) {
+    /* linkmap is a member of Obj_Entry */
+    obj_entry = lm - off_linkmap;
+    /* get tlsindex of the object file */
+    if (target_read_memory (obj_entry + off_tlsindex, buf, sizeof(int)))
+      throw_error (TLS_GENERIC_ERROR, _("Can't read TLS index"));
+    tls_index = extract_signed_integer (buf, sizeof(int), byte_order);
+
+    /* get thread tcb */
+    if (target_read_memory (thr + off_tcb, buf, ptr_type->length))
+      throw_error (TLS_GENERIC_ERROR, _("Can't read TCB address"));
+    tcb_addr = extract_typed_address (buf, ptr_type);
+
+    /* get dtv array address */
+    if (target_read_memory (tcb_addr + off_dtv, buf, ptr_type->length))
+      throw_error (TLS_GENERIC_ERROR, _("Can't read DTV address"));
+    dtv_addr = extract_typed_address (buf, ptr_type);
+
+    /* get the object's tls block base address */
+    if (target_read_memory (dtv_addr + (tls_index + 1) * ptr_type->length,
+			    buf, ptr_type->length))
+      throw_error (TLS_GENERIC_ERROR, _("Can't read DTV"));
+    tls_addr = extract_typed_address (buf, ptr_type);
+
+  } else {
+    /* This code path handles the case of -static -lpthread executables: */
+    /* get thread tcb */
+    if (target_read_memory (thr + off_tcb, buf, ptr_type->length))
+      throw_error (TLS_GENERIC_ERROR, _("Can't read TCB address"));
+    tcb_addr = extract_typed_address (buf, ptr_type);
+    tls_addr = tcb_addr;
+
+#if  defined(__arm__) || defined(__mips__)
+    int tls_offset = 0x8;
+    tls_addr = tcb_addr + tls_offset;
+#elif defined(__aarch64__) || defined(__mips64__)
+    int tls_offset = 0x10;
+    tls_addr = tcb_addr + tls_offset;
+#elif defined(__i386__)
+    int dtv_index = 0x8;
+#elif defined(__amd64__)
+    int dtv_index = 0x10;
+#endif
+
+#if defined(__i386__) || defined(__amd64__)
+    /* get dtv array address */
+    if (target_read_memory (tcb_addr + off_dtv, buf, ptr_type->length))
+      throw_error (TLS_GENERIC_ERROR, _("Can't read DTV address"));
+    dtv_addr = extract_typed_address (buf, ptr_type);
+
+    /* get the object's tls block base address */
+    if (target_read_memory (dtv_addr + dtv_index,
+			    buf, ptr_type->length))
+      throw_error (TLS_GENERIC_ERROR, _("Can't read DTV"));
+    tls_addr = extract_typed_address (buf, ptr_type);
+#endif
+  }
+  return tls_addr + offset;
+}

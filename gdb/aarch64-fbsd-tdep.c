@@ -196,8 +196,11 @@ aarch64_fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
   target_fetch_registers (regcache, tdep->tls_regnum);
 
   ULONGEST tpidr;
-  if (regcache->cooked_read (tdep->tls_regnum, &tpidr) != REG_VALID)
-    error (_("Unable to fetch %%tpidr"));
+  if (regcache->cooked_read (tdep->tls_regnum, &tpidr) != REG_VALID) {
+    /* error (_("Unable to fetch %%tpidr")); */
+    /* If default way fails use fallback approach to fetch TLS */
+    return fbsd_get_thread_local_address_fallback(gdbarch, ptid, lm_addr, offset);
+  }
 
   /* %tpidr points to the TCB whose first member is the dtv
       pointer.  */
