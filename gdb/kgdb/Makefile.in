@@ -3,6 +3,7 @@ exec_prefix = @exec_prefix@
 
 host_alias = @host_alias@
 target_alias = @target_alias@
+target_name = $(shell echo $(target_alias) | sed s/-.*//g | sed s/v.*//g)
 program_transform_name = @program_transform_name@
 bindir = @bindir@
 libdir = @libdir@
@@ -86,7 +87,7 @@ CC_LD = $(CXX) $(CXX_DIALECT)
 
 # Global include
 INCLUDE_DIR = $(srcdir)/../../include
-INCLUDE_CFLAGS = -I$(INCLUDE_DIR) -I../../
+INCLUDE_CFLAGS = -I$(INCLUDE_DIR) -I../../ -I$(srcdir)/libkvm
 
 BFD_DIR = ../../bfd
 BFD = $(BFD_DIR)/libbfd.a
@@ -115,10 +116,10 @@ GNULIB_H = $(GNULIB_BUILDDIR)/import/string.h \
 
 GDB_CFLAGS = -I.. -I$(srcdir)/.. -I$(srcdir)/../common -I$(srcdir)/../config -I$(srcdir)/../../
 
-KGDB_CFLAGS = -I$(srcdir) -I$(srcdir)/../../readline -I$(srcdir)/libbsd -I$(srcdir)/../../
-
 CFLAGS = @CFLAGS@
 CXXFLAGS = @CXXFLAGS@
+
+KGDB_CFLAGS = -I$(srcdir) -I$(srcdir)/include/$(target_name) -I$(srcdir)/../../readline -I$(srcdir)/libbsd -I$(srcdir)/libbsd/include -I$(srcdir)/../../ $(CFLAGS) $(CXXFLAGS)
 
 CONFIG_LDFLAGS = @CONFIG_LDFLAGS@
 GDB_SIM = @GDB_SIM@
@@ -134,8 +135,6 @@ POSTCOMPILE = @true
 INTERNAL_CFLAGS_BASE = $(CXXFLAGS) $(KGDB_CFLAGS) $(GDB_CFLAGS) \
 	$(INCGNU) $(INCLUDE_CFLAGS) $(BFD_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_CFLAGS_BASE)  $(KGDB_CFLAGS) $(KGDB_CFLAGS_EXTRA)
-
-LDFLAGS = @LDFLAGS@ @RDYNAMIC@
 
 GDBLIB_BUILDDIR = ..
 LIBGDB = $(GDBLIB_BUILDDIR)/libgdb.a

@@ -1,18 +1,20 @@
+kgdb_target_obs="kvm.o kvm_utils.o kvm_hpt.o"
+
 get_kgdb_objs() {
 case "${target}" in
   aarch64*-*-freebsd*)
 	# Target: FreeBSD/aarch64
-	kgdb_target_obs="${kgdb_target_obs} aarch64-fbsd-kern.o"
+	kgdb_target_obs="${kgdb_target_obs} aarch64-fbsd-kern.o kvm_minidump_aarch64.o"
 	;;
 
   arm*-*-freebsd*)
 	# Target: FreeBSD/arm
-	kgdb_target_obs="${kgdb_target_obs} arm-fbsd-kern.o"
+	kgdb_target_obs="${kgdb_target_obs} arm-fbsd-kern.o kvm_arm.o kvm_minidump_arm.o"
 	;;
 
   i[34567]86-*-freebsd* | i[34567]86-*-kfreebsd*-gnu)
  	# Target: FreeBSD/i386
-	kgdb_target_obs="${kgdb_target_obs} i386fbsd-kern.o"
+	kgdb_target_obs="${kgdb_target_obs} i386fbsd-kern.o kvm_i386.o kvm_minidump_i386.o"
 	if test "x$enable_64_bit_bfd" = "xyes"; then
 	    # Target: FreeBSD amd64
 	    kgdb_target_obs="amd64fbsd-kern.o ${kgdb_target_obs}"
@@ -21,27 +23,27 @@ case "${target}" in
 
   mips64*-*-freebsd*)
 	# Target: MIPS64 running FreeBSD
-	kgdb_target_obs="${kgdb_target_obs} mipsfbsd-kern.o"
+	kgdb_target_obs="${kgdb_target_obs} mipsfbsd-kern.o kvm_mips64.o kvm_minidump_mips64.o"
 	;;
 
   mips*-*-freebsd*)
 	# Target: MIPS32 running FreeBSD
-	kgdb_target_obs="${kgdb_target_obs} mipsfbsd-kern.o"
+	kgdb_target_obs="${kgdb_target_obs} mipsfbsd-kern.o kvm_mips.o kvm_minidump_mips.o"
 	;;
 
   powerpc64*-*-freebsd*)
 	# Target: FreeBSD/powerpc64
-	kgdb_target_obs="${kgdb_target_obs} ppcfbsd-kern.o"
+	kgdb_target_obs="${kgdb_target_obs} ppcfbsd-kern.o kvm_powerpc64.o kvm_minidump_powerpc64.o"
 	;;
 
   powerpc*-*-freebsd*)
 	# Target: FreeBSD/powerpc
-	kgdb_target_obs="${kgdb_target_obs} ppcfbsd-kern.o"
+	kgdb_target_obs="${kgdb_target_obs} ppcfbsd-kern.o kvm_powerpc.o"
 	;;
 
   x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
         # Target: FreeBSD/amd64
-	kgdb_target_obs="${kgdb_target_obs} amd64fbsd-kern.o"
+	kgdb_target_obs="${kgdb_target_obs} amd64fbsd-kern.o kvm_amd64.o kvm_minidump_amd64.o"
 	;;
 esac
 echo "$kgdb_target_obs"
@@ -53,14 +55,13 @@ case "${target}" in
 	gdb_sim=../../sim/mips/libsim.a
 	;;
   arm*-*-freebsd*)
-	gdb_sim=../../sim/arm/libsim.a
-	;;
+     gdb_sim=../../sim/arm/libsim.a
+     ;;
   aarch64*-*-freebsd*)
-	gdb_sim=../../sim/aarch64/libsim.a
-	;;
+     gdb_sim=../../sim/aarch64/libsim.a
+     ;;
   ppc*-*-freebsd*|powerpc*-*-freebsd*)
-	gdb_sim=../../sim/ppc/libsim.a
-	;;
+     gdb_sim=../../sim/ppc/libsim.a
 esac
 echo "$gdb_sim"
 }

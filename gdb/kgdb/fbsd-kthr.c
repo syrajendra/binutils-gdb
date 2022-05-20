@@ -25,7 +25,10 @@
  */
 
 #include <sys/param.h>
-#include <sys/proc.h>
+#ifndef __FreeBSD__
+#include <include/bsd/string.h>
+#endif
+#include <include/sys/target.h>
 #include <stdbool.h>
 
 #include "defs.h"
@@ -319,17 +322,38 @@ kgdb_thr_init(CORE_ADDR (*cpu_pcb_addr) (u_int))
 			thread_off_td_oncpu = td_oncpu.offset / 8;
 			thread_oncpu_size = FIELD_BITSIZE(*td_oncpu.field) / 8;
 		} catch (const gdb_exception_error &e2) {
-			proc_off_p_pid = offsetof(struct proc, p_pid);
-			proc_off_p_comm = offsetof(struct proc, p_comm);
-			proc_off_p_list = offsetof(struct proc, p_list);
-			proc_off_p_threads = offsetof(struct proc, p_threads);
-			thread_off_td_tid = offsetof(struct thread, td_tid);
-			thread_off_td_name = offsetof(struct thread, td_name);
-			thread_off_td_oncpu = offsetof(struct thread, td_oncpu);
-			thread_off_td_pcb = offsetof(struct thread, td_pcb);
-			thread_off_td_plist = offsetof(struct thread, td_plist);
-			thread_oncpu_size =
-			    sizeof(((struct thread *)0)->td_oncpu);
+		        try {
+		                proc_off_p_pid = parse_and_eval_address
+				        ("&((struct proc *)0)->p_pid");
+			        proc_off_p_comm = parse_and_eval_address
+				        ("&((struct proc *)0)->p_comm");
+			        proc_off_p_list = parse_and_eval_address
+				        ("&((struct proc *)0)->p_list");
+			        proc_off_p_threads = parse_and_eval_address
+                                        ("&((struct proc *)0)->p_threads");
+			} catch (const gdb_exception_error &e3) {
+			        error (_("Unexpected process structure\n"));
+			}
+			try {
+			        thread_off_td_tid = parse_and_eval_address
+				        ("&((struct thread *)0)->td_tid");
+			        try {
+				        thread_off_td_name = parse_and_eval_address
+					        ("&((struct thread *)0)->td_name");
+			        } catch (const gdb_exception_error &e3) {
+                                        thread_off_td_name = -1;
+				}
+				thread_off_td_oncpu = parse_and_eval_address
+				        ("&((struct thread *)0)->td_oncpu");
+				thread_off_td_pcb = parse_and_eval_address
+				        ("&((struct thread *)0)->td_pcb");
+				thread_off_td_plist = parse_and_eval_address
+				        ("&((struct thread *)0)->td_plist");
+				thread_oncpu_size = parse_and_eval_long
+				        ("sizeof(((struct thread *)0)->td_oncpu)");
+			} catch (const gdb_exception_error &e3) {
+			        error (_("Unexpected thread structure\n"));
+			}
 		}
 	}
 
@@ -350,7 +374,7 @@ kgdb_thr_init(CORE_ADDR (*cpu_pcb_addr) (u_int))
 			    lookup_struct_elt (proc_sym->type (), "p_hash",
 				0).offset / 8;
 		} catch (const gdb_exception_error &e2) {
-			proc_off_p_hash = offsetof(struct proc, p_hash);
+			proc_off_p_hash = parse_and_eval_long("sizeof(((struct proc *)0)->p_hash)");
 		}
 	}
 

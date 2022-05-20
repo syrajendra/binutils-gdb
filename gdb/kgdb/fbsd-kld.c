@@ -37,6 +37,10 @@
 #include "solib.h"
 #include "solist.h"
 
+#ifndef __FreeBSD__
+#include <include/bsd/string.h>
+#endif
+
 #include "kgdb.h"
 
 struct lm_info_kld : public lm_info_base {

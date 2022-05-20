@@ -36,11 +36,6 @@
 #include "amd64-tdep.h"
 #include "gdbsupport/x86-xstate.h"
 
-#ifdef __amd64__
-#include <machine/pcb.h>
-#include <machine/frame.h>
-#endif
-
 #include "kgdb.h"
 
 enum {
@@ -310,66 +305,4 @@ _initialize_amd64_kgdb_tdep ()
 {
 	gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
 	    GDB_OSABI_FREEBSD_KERNEL, amd64fbsd_kernel_init_abi);
-
-#ifdef __amd64__
-	gdb_assert(offsetof(struct pcb, pcb_rbx)
-		   == amd64fbsd_pcb_offset[AMD64_RBX_REGNUM]);
-	gdb_assert(offsetof(struct pcb, pcb_rbp)
-		   == amd64fbsd_pcb_offset[AMD64_RBP_REGNUM]);
-	gdb_assert(offsetof(struct pcb, pcb_rsp)
-		   == amd64fbsd_pcb_offset[AMD64_RSP_REGNUM]);
-	gdb_assert(offsetof(struct pcb, pcb_r12)
-		   == amd64fbsd_pcb_offset[AMD64_R12_REGNUM]);
-	gdb_assert(offsetof(struct pcb, pcb_r13)
-		   == amd64fbsd_pcb_offset[AMD64_R13_REGNUM]);
-	gdb_assert(offsetof(struct pcb, pcb_r14)
-		   == amd64fbsd_pcb_offset[AMD64_R14_REGNUM]);
-	gdb_assert(offsetof(struct pcb, pcb_r15)
-		   == amd64fbsd_pcb_offset[AMD64_R15_REGNUM]);
-	gdb_assert(offsetof(struct pcb, pcb_rip)
-		   == amd64fbsd_pcb_offset[AMD64_RIP_REGNUM]);
-	gdb_assert(CODE_SEL == GSEL(GCODE_SEL, SEL_KPL));
-	gdb_assert(DATA_SEL == GSEL(GDATA_SEL, SEL_KPL));
-	gdb_assert(sizeof(struct trapframe) == TRAPFRAME_SIZE);
-	gdb_assert(offsetof(struct trapframe, tf_rax)
-		   == amd64fbsd_trapframe_offset[AMD64_RAX_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_rbx)
-		   == amd64fbsd_trapframe_offset[AMD64_RBX_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_rcx)
-		   == amd64fbsd_trapframe_offset[AMD64_RCX_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_rdx)
-		   == amd64fbsd_trapframe_offset[AMD64_RDX_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_rsi)
-		   == amd64fbsd_trapframe_offset[AMD64_RSI_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_rdi)
-		   == amd64fbsd_trapframe_offset[AMD64_RDI_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_rbp)
-		   == amd64fbsd_trapframe_offset[AMD64_RBP_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_rsp)
-		   == amd64fbsd_trapframe_offset[AMD64_RSP_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_r8)
-		   == amd64fbsd_trapframe_offset[AMD64_R8_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_r9)
-		   == amd64fbsd_trapframe_offset[AMD64_R9_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_r10)
-		   == amd64fbsd_trapframe_offset[AMD64_R10_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_r11)
-		   == amd64fbsd_trapframe_offset[AMD64_R11_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_r12)
-		   == amd64fbsd_trapframe_offset[AMD64_R12_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_r13)
-		   == amd64fbsd_trapframe_offset[AMD64_R13_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_r14)
-		   == amd64fbsd_trapframe_offset[AMD64_R14_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_r15)
-		   == amd64fbsd_trapframe_offset[AMD64_R15_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_rip)
-		   == amd64fbsd_trapframe_offset[AMD64_RIP_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_rflags)
-		   == amd64fbsd_trapframe_offset[AMD64_EFLAGS_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_cs)
-		   == amd64fbsd_trapframe_offset[AMD64_CS_REGNUM]);
-	gdb_assert(offsetof(struct trapframe, tf_ss)
-		   == amd64fbsd_trapframe_offset[AMD64_SS_REGNUM]);
-#endif
 }

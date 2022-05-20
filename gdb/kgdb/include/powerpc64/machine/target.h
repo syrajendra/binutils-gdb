@@ -1,0 +1,67 @@
+/*
+ * Copyright (c) 2011, Juniper Networks, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#ifndef	_MACHINE_TARGET_H_
+#define	_MACHINE_TARGET_H_ 1
+
+typedef uint64_t pte_t;
+typedef	uint64_t kgdb_cpumask_t;
+
+/* from machine/vmparam.h */
+#define	KERNBASE	0xc000000000000000ULL	/* start of kernel virtual */
+
+
+/* from machine/param.h */
+#define	PAGE_SHIFT	12
+#define	PAGE_SIZE	(1 << PAGE_SHIFT)	/* Page size */
+#define	PAGE_MASK	(PAGE_SIZE - 1)
+#define	round_page(x)	(((uint64_t)(x) + PAGE_MASK) & ~(uint64_t)PAGE_MASK)
+
+
+/* from machine/pte.h */
+#define PTE_VALID		(1<<(63-63))	/* Valid */
+#define PTE_ISVALID(pte)        ((*pte) & PTE_VALID)
+#define PTE_RPN_SHIFT		24
+#define PTE_PA_SHIFT		(PTE_RPN_SHIFT-12)
+#define PTE_PA_MASK		(uint64_t)PAGE_MASK
+#define PTE_PA(pte)             ((*pte >> PTE_PA_SHIFT) & ~PTE_PA_MASK)
+
+
+/* from machine/minidump.h */
+#define	MINIDUMP_MAGIC		"minidump FreeBSD/ppc64"
+#define	MINIDUMP_VERSION	1
+
+struct minidumphdr {
+	char magic[24];
+	uint32_t version;
+	uint32_t msgbufsize;
+	uint32_t bitmapsize;
+	uint32_t ptesize;
+	uint64_t kernbase;
+	uint64_t dmapbase;
+	uint64_t dmapend;
+};
+
+#endif /* _MACHINE_TARGET_H_ */

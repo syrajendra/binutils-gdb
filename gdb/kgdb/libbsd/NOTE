@@ -1,0 +1,11 @@
+SOURCE: git clone https://anongit.freedesktop.org/git/libbsd.git
+HASH: 7cfa2d4530325444fa71c2bdb14e11ba9d4de0b6
+
+The release tarballs can be found here
+https://libbsd.freedesktop.org/releases/
+
+Following autotools were used:
+autoconf - 2.69
+automake - 1.15
+
+autotools generated using /volume/hab on ubuntu16.

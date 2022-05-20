@@ -44,7 +44,7 @@
 
 #include <sys/user.h>
 #include <fcntl.h>
-#include <kvm.h>
+#include <libkvm/kvm.h>
 
 #include "kgdb.h"
 
@@ -413,7 +413,7 @@ fbsd_kvm_target_open (const char *args, int from_tty)
 			else
 				pcb_size = 0;
 #else
-			pcb_size = sizeof(struct pcb);
+			pcb_size = 0;
 #endif
 		}
 	}

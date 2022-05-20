@@ -34,7 +34,8 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include <err.h>
-#include <kvm.h>
+#include <libkvm/kvm.h>
+#include <include/proc_service.h>
 #include <limits.h>
 #include <paths.h>
 
@@ -57,6 +58,12 @@
 #include <unistd.h>
 
 #include "kgdb.h"
+
+#ifndef __FreeBSD__
+#include "getprogname.h"
+#include "bsd/stdlib.h"
+#include "bsd/string.h"
+#endif
 
 static int verbose;
 
@@ -379,11 +386,13 @@ main(int argc, char *argv[])
 			vmcore = strdup(argv[optind++]);
 		if (argc > optind)
 			warnx("multiple core files specified. Ignored");
-	} else if (vmcore == NULL && kernel == NULL) {
+	}
+#ifdef __FreeBSD__
+    else if (vmcore == NULL && kernel == NULL) {
 		vmcore = strdup(_PATH_MEM);
 		kernel = strdup(getbootfile());
 	}
-
+#endif /* __FreeBSD__ */
 	if (verbose) {
 		if (vmcore != NULL)
 			warnx("core file: %s", vmcore);
@@ -403,6 +412,7 @@ main(int argc, char *argv[])
 
 	/* If we don't have a kernel image yet, try to find one. */
 	if (kernel == NULL) {
+#ifdef __FreeBSD__
 		if (dumpnr != NULL)
 			kernel_from_dumpnr(dumpnr);
 
@@ -410,6 +420,11 @@ main(int argc, char *argv[])
 			errx(1, "couldn't find a suitable kernel image");
 		if (verbose)
 			warnx("kernel image: %s", kernel);
+#else
+		warnx("need a kernel image to debug");
+		usage();
+		exit(1);
+#endif /* __FreeBSD__ */
 	}
 
 	/* Set an alternate prompt. */
@@ -453,4 +468,18 @@ main(int argc, char *argv[])
 	initialize_all_kgdb_files();
 
 	return (gdb_main(&args));
+}
+
+ps_err_e __attribute__ ((weak))
+ps_pglobal_lookup(struct ps_prochandle *ph, const char *obj,
+		  const char *name, uint64_t *sym_addr)
+{
+  struct bound_minimal_symbol ms;
+
+  ms = lookup_minimal_symbol (name, NULL, NULL);
+  if (ms.minsym == NULL)
+    return PS_NOSYM;
+
+  *sym_addr = (uint64_t) BMSYMBOL_VALUE_ADDRESS (ms);
+  return PS_OK;
 }
