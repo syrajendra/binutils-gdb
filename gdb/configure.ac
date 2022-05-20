@@ -2151,9 +2151,9 @@ if test "$fbsd_trgt" = "yes"; then
 fi
 
 case "$host_alias" in
-  i*86-*-freebsd* | i*86-*-kfreebsd*-gnu) configure_kgdb="yes" ;;
-  *freebsd*) configure_kgdb="yes" ;;
-  *linux*) configure_kgdb="yes" ;;
+  i*86-*-freebsd* | i*86-*-kfreebsd*-gnu) ;;
+  *freebsd*) ;;
+  *linux*) ;;
   *) configure_kgdb="no" ;;
 esac
 
