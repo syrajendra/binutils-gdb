@@ -204,10 +204,10 @@ LIBXXHASH = @LIBXXHASH@
 LIBIPT = @LIBIPT@
 
 # Where is libgmp?
-LIBGMP = -Wl,-Bstatic @LIBGMP@ -Wl,-Bdynamic
+LIBGMP = @LIBGMP@
 
 # Where is libmpfr?  This will be empty if libmpfr was not available.
-LIBMPFR = -Wl,-Bstatic @LIBMPFR@ -Wl,-Bdynamic
+LIBMPFR = @LIBMPFR@
 
 # GNU source highlight library.
 SRCHIGH_LIBS = @SRCHIGH_LIBS@

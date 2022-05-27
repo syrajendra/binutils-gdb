@@ -114,10 +114,10 @@ echo "$kgdb_cflags_extra"
 get_kgdb_host_ldflags() {
 case "${host_alias}" in
   *freebsd*)
-	kgdb_host_ldflags=" -liconv -Wl,-Bstatic -lmpfr -lgmp -Wl,-Bdynamic -lkvm "
+	kgdb_host_ldflags=" -liconv -lmpfr -lgmp -lkvm "
 	;;
   *linux*)
-	kgdb_host_ldflags=" -ldl -Wl,-Bstatic -lmpfr -lgmp -Wl,-Bdynamic libbsd/src/.libs/libbsd.a -lpthread "
+	kgdb_host_ldflags=" -ldl -lmpfr -lgmp libbsd/src/.libs/libbsd.a -lpthread "
 	;;
 esac
 echo "$kgdb_host_ldflags"
