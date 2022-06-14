@@ -330,6 +330,13 @@ extern int jverbose;
 
 extern int jverbose_print_fileoff;
 
+void jprintf_message(char const *file,
+                     char const *func,
+                     const unsigned int line,
+                     char const *fmt, ...);
+
+#define JPRINTF(format, ...) 	jprintf_message(__FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
+
 /* From printcmd.c */
 
 extern void set_next_address (struct gdbarch *, CORE_ADDR);

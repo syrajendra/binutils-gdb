@@ -103,6 +103,25 @@ int jverbose_print_fileoff = 0;
 /* GDB as it has been invoked from the command line (i.e. argv[0]).  */
 static char *gdb_program_name;
 
+static pthread_mutex_t jprint_mutex = PTHREAD_MUTEX_INITIALIZER;
+void jprintf_message(char const *file,
+                      char const *func,
+                      const unsigned int line,
+                      char const *fmt, ...)
+{
+  if (jverbose) {
+    pthread_mutex_lock(&jprint_mutex);
+    const char *ptr = strstr(file, "binutils-gdb");
+    if (ptr) file = ptr;
+    fprintf(stderr, "GDB:%s:%s:%d:: ", file, func, line);
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    va_end(ap);
+    pthread_mutex_unlock(&jprint_mutex);
+  }
+}
+
 /* Return read only pointer to GDB_PROGRAM_NAME.  */
 const char *
 get_gdb_program_name (void)
@@ -1003,8 +1022,11 @@ captured_main_1 (struct captured_main_args *context)
 	    break;
 
       case 'V':
+      {
         jverbose = 1;
-        break;
+        JPRINTF("*** Juniper Vebose Mode Enabled ***\n");
+      }
+      break;
 
 	  case OPT_READNOW:
 	    {
@@ -1461,7 +1483,8 @@ Operating modes:\n\n\
 		     GDB exit code will be the child's exit code.\n\
   --configuration    Print details about GDB configuration and then exit.\n\
   --help             Print this message and then exit.\n\
-  --version          Print version information and then exit.\n\n\
+  --version          Print version information and then exit.\n\
+  --jverbose         Print GDB verbose messages.\n\n\
 Remote debugging options:\n\n\
   -b BAUDRATE        Set serial port baud rate used for remote debugging.\n\
   -l TIMEOUT         Set timeout in seconds for remote debugging.\n\n\

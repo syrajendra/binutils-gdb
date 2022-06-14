@@ -591,6 +591,8 @@ execute_command (const char *p, int from_tty)
   const char *line;
   const char *cmd_start = p;
 
+  if (p) JPRINTF("Command p = %s \n", p);
+
   auto cleanup_if_error = make_scope_exit (bpstat_clear_actions);
   scoped_value_mark cleanup = prepare_execute_command ();
 
