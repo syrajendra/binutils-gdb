@@ -205,6 +205,7 @@ kgdb_thr_add_procs_list(CORE_ADDR paddr, CORE_ADDR (*cpu_pcb_addr) (u_int))
 	enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 	CORE_ADDR pnext;
 
+	CORE_ADDR fpaddr = paddr;
 	while (paddr != 0) {
 		try {
 			pnext = read_memory_typed_address (paddr +
@@ -214,6 +215,10 @@ kgdb_thr_add_procs_list(CORE_ADDR paddr, CORE_ADDR (*cpu_pcb_addr) (u_int))
 		}
 		kgdb_thr_add_proc(paddr, cpu_pcb_addr);
 		paddr = pnext;
+		if (fpaddr == paddr) {
+		    printf("WARNING: kgdb found a loop in process list\n");
+		    break;
+		}
 	}
 }
 
