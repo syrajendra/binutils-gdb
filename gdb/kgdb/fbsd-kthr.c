@@ -216,8 +216,8 @@ kgdb_thr_add_procs_list(CORE_ADDR paddr, CORE_ADDR (*cpu_pcb_addr) (u_int))
 		kgdb_thr_add_proc(paddr, cpu_pcb_addr);
 		paddr = pnext;
 		if (fpaddr == paddr) {
-		    printf("WARNING: kgdb found a loop in process list\n");
-		    break;
+			printf("WARNING: kgdb found a loop in process list trying hash...\n");
+			throw_error (INTERNAL_DATA_ERROR, _("process loop detected"));
 		}
 	}
 }
@@ -393,13 +393,14 @@ kgdb_thr_init(CORE_ADDR (*cpu_pcb_addr) (u_int))
 			paddr = read_memory_typed_address (addr, ptr_type);
 			kgdb_thr_add_procs_list(paddr, cpu_pcb_addr);
 		} catch (const gdb_exception_error &e) {
-			return (NULL);
-		}
-
-		try {
-			paddr = read_memory_typed_address (addr, ptr_type);
-			kgdb_thr_add_procs_list(paddr, cpu_pcb_addr);
-		} catch (const gdb_exception_error &e) {
+			/* When process list of allproc fails try pidhashtbl */
+			addr = kgdb_lookup("pidhashtbl");
+			try {
+				addr = read_memory_typed_address (addr, ptr_type);
+				kgdb_thr_add_procs_hash(addr, cpu_pcb_addr);
+			} catch (const gdb_exception_error &e) {
+				return (NULL);
+			}
 		}
 	} else {
 		addr = kgdb_lookup("pidhashtbl");

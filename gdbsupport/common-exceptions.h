@@ -106,6 +106,9 @@ enum errors {
      "_ERROR" is appended to the name.  */
   MAX_COMPLETIONS_REACHED_ERROR,
 
+  /* Exception  used by kgdb which heavily replies on datastructure fetched by gdb */
+  INTERNAL_DATA_ERROR,
+
   /* Add more errors here.  */
   NR_ERRORS
 };
