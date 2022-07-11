@@ -130,6 +130,7 @@ static gdb::optional<std::string>
 find_kld_path (const char *filename)
 {
   char *kld_env;
+  static gdb::unique_xmalloc_ptr<char> module_path(nullptr);
   if ((kld_env = getenv("KGDB_KLD_PATH")) != NULL) {
     std::string kld_dir;
     char tmp_path[PATH_MAX];
@@ -172,9 +173,10 @@ find_kld_path (const char *filename)
   struct kld_info *info = get_kld_info ();
   if (info->module_path_addr != 0)
     {
-      gdb::unique_xmalloc_ptr<char> module_path
-	= target_read_string(info->module_path_addr, PATH_MAX);
-
+      if (module_path == nullptr) {
+        module_path
+		= target_read_string(info->module_path_addr, PATH_MAX);
+	  }
       if (module_path != nullptr)
 	{
 	  char *cp = module_path.get();
