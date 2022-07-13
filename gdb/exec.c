@@ -390,6 +390,8 @@ exec_file_attach (const char *filename, int from_tty)
       int scratch_chan;
       char **matching;
 
+      JPRINTF("filename '%s'\n", filename);
+
       if (is_target_filename (filename))
 	{
 	  if (target_filesystem_is_local ())
@@ -522,6 +524,7 @@ exec_file_command (const char *args, int from_tty)
 
   if (args)
     {
+      JPRINTF("args '%s'\n", args);
       /* Scan through the args and pick up the first non option arg
 	 as the filename.  */
 

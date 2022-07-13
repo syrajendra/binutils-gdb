@@ -91,7 +91,7 @@ public:
 
   const char *thread_name (struct thread_info *) override;
 
-  bool has_all_memory () override { return true; }
+  bool has_all_memory () override { return false; }
   bool has_memory () override;
   bool has_stack () override;
   bool has_registers () override;

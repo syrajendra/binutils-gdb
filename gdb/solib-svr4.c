@@ -1251,7 +1251,7 @@ svr4_read_so_list (svr4_info *info, CORE_ADDR lm, CORE_ADDR prev_lm,
       strncpy (newobj->so_name, buffer.get (), SO_NAME_MAX_PATH_SIZE - 1);
       newobj->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
       strcpy (newobj->so_original_name, newobj->so_name);
-
+      JPRINTF("so_name '%s'\n", newobj->so_original_name);
       /* If this entry has no name, or its name matches the name
 	 for the main executable, don't include it in the list.  */
       if (! newobj->so_name[0] || match_main (newobj->so_name))
