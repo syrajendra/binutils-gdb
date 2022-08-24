@@ -2338,6 +2338,8 @@ value_struct_elt (struct value **argp,
   struct type *t;
   struct value *v;
 
+  if (*argp == NULL) return NULL;
+
   *argp = coerce_array (*argp);
 
   t = check_typedef ((*argp)->type ());
