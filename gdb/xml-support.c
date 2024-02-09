@@ -605,11 +605,12 @@ gdb_xml_parser::parse (const char *buffer)
       throw_exception (std::move (m_error));
     }
 
-  if (m_last_line != 0)
-    warning (_("while parsing %s (at line %d): %s"), m_name,
-	     m_last_line, error_string);
-  else
-    warning (_("while parsing %s: %s"), m_name, error_string);
+  // PR - 1790501
+  //if (m_last_line != 0)
+  //  warning (_("while parsing %s (at line %d): %s"), m_name,
+	//     m_last_line, error_string);
+  //else
+  //  warning (_("while parsing %s: %s"), m_name, error_string);
 
   return -1;
 }
