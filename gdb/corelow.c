@@ -264,9 +264,10 @@ core_target::build_file_mappings ()
 	      {
 		m_core_unavailable_mappings.emplace_back (start, end - start);
 		unavailable_paths.insert (filename);
-		warning (_("Can't open file %s during file-backed mapping "
-			   "note processing"),
-			 filename);
+		// PR-1630535
+		//warning (_("Can't open file %s during file-backed mapping "
+		//	   "note processing"),
+		//	 filename);
 		return;
 	      }
 
@@ -276,9 +277,10 @@ core_target::build_file_mappings ()
 	      {
 		m_core_unavailable_mappings.emplace_back (start, end - start);
 		unavailable_paths.insert (filename);
-		warning (_("Can't open file %s which was expanded to %s "
-			   "during file-backed mapping note processing"),
-			 filename, expanded_fname.get ());
+		// PR-1630535
+		//warning (_("Can't open file %s which was expanded to %s "
+		//	   "during file-backed mapping note processing"),
+		//	 filename, expanded_fname.get ());
 
 		if (bfd != nullptr)
 		  bfd_close (bfd);
