@@ -188,7 +188,7 @@ kgdb$(EXEEXT): kgdb-main.o $(KGDB_TARGET_OBJS) $(COMMON_OBJS) $(LIBGDB) $(CDEPS)
 	rm -f kgdb$(EXEEXT)
 	$(CC_LD) $(INTERNAL_LDFLAGS) -o kgdb$(EXEEXT) \
 	kgdb-main.o kgdb-init.o \
-	$(KGDB_TARGET_OBJS) $(COMMON_OBJS) $(LIBGDB) $(GDB_SIM) $(CLIBS) \
+	$(KGDB_TARGET_OBJS) $(COMMON_OBJS) -Wl,--whole-archive $(LIBGDB) -Wl,--no-whole-archive $(GDB_SIM) $(CLIBS) \
 	-lncurses  -lutil -lexpat $(KGDB_HOST_LDFLAGS)
 
 $(SUBDIRS): force

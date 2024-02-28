@@ -49,7 +49,7 @@
 #include <gdbcore.h>
 
 #include <unistd.h>
-
+#include "run-on-main-thread.h"
 #include "kgdb.h"
 
 #ifndef __FreeBSD__
@@ -459,7 +459,7 @@ main(int argc, char *argv[])
 
 	extern void initialize_all_kgdb_files(void);
 	initialize_all_kgdb_files();
-
+	gdb_assert (is_main_thread ());
 	return (gdb_main(&args));
 }
 
