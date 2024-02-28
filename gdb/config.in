@@ -46,6 +46,9 @@
    language is requested. */
 #undef ENABLE_NLS
 
+/* Define to 1 if fbsd target */
+#undef FBSD_TRGT
+
 /* The .gdbearlyinit filename. */
 #undef GDBEARLYINIT
 
@@ -617,8 +620,7 @@
    moved. */
 #undef JIT_READER_DIR_RELOCATABLE
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
 /* Name of this package. */

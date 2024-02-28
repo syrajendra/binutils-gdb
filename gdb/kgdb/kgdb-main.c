@@ -1,0 +1,478 @@
+/*
+ * Copyright (c) 2004 Marcel Moolenaar
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include <sys/types.h>
+#include <errno.h>
+#include <err.h>
+#include <libkvm/kvm.h>
+#include <include/proc_service.h>
+#include <limits.h>
+#include <paths.h>
+
+/* libgdb stuff. */
+#include <defs.h>
+#include <frame.h>
+#include <frame-unwind.h>
+#include <inferior.h>
+#include <interps.h>
+#include <cli-out.h>
+#include <main.h>
+#include <objfiles.h>
+#include "serial.h"
+#include <target.h>
+#include <top.h>
+#include <ui-file.h>
+#include <bfd.h>
+#include <gdbcore.h>
+
+#include <unistd.h>
+
+#include "kgdb.h"
+
+#ifndef __FreeBSD__
+#include "getprogname.h"
+#include "bsd/stdlib.h"
+#include "bsd/string.h"
+#endif
+
+static int verbose;
+
+static char crashdir[PATH_MAX];
+static char *dumpnr;
+static char *kernel;
+static char *remote;
+static char *vmcore;
+static char *command_file;
+static char *interpr;
+
+/*
+ * TODO:
+ * - test remote kgdb (see if threads and klds work)
+ * - possibly split kthr.c out into a separate thread_stratum target that
+ *   uses new_objfile test to push itself when a FreeBSD kernel is loaded
+ *   (check for kernel osabi) (probably don't bother with this)
+ * + test alternate kgdb_lookup()
+ * + fix kgdb build on amd64 to include i386 cross-debug support
+ * - propose expanded libkvm interface that supports cross-debug and moves
+ *   MD bits of kgdb into the library (examining PCB's and exporting a
+ *   stable-ABI struct of registers, similarly for trapframe handling and
+ *   stop-pcb stuff
+ * + use tid's as lwp IDs instead of PIDs in ptid's
+ */
+
+static void
+usage(void)
+{
+
+	fprintf(stderr,
+	    "usage: %s [-Vafqvw] [-b rate] [-d crashdir] [-c core | -n dumpnr | -r device]\n"
+	    "\t[-batch] [-interpreter mi] [-x command_file] [kernel [core]]\n", getprogname());
+}
+
+static void
+kernel_from_dumpnr(const char *nr)
+{
+	char line[PATH_MAX], path[PATH_MAX];
+	FILE *info;
+	char *dir;
+	struct stat st;
+	int l;
+
+	/*
+	 * If there's a kernel image right here in the crash directory, then
+	 * use it.  The kernel image is either called kernel.<nr> or is in a
+	 * subdirectory kernel.<nr> and called kernel.  The latter allows us
+	 * to collect the modules in the same place.
+	 */
+	snprintf(path, sizeof(path), "%s/kernel.%s", crashdir, nr);
+	if (stat(path, &st) == 0) {
+		if (S_ISREG(st.st_mode)) {
+			kernel = strdup(path);
+			return;
+		}
+		if (S_ISDIR(st.st_mode)) {
+			snprintf(path, sizeof(path), "%s/kernel.%s/kernel",
+			    crashdir, nr);
+			if (stat(path, &st) == 0 && S_ISREG(st.st_mode)) {
+				kernel = strdup(path);
+				return;
+			}
+		}
+	}
+
+	/*
+	 * No kernel image here.  Parse the dump header.  The kernel object
+	 * directory can be found there and we probably have the kernel
+	 * image still in it.  The object directory may also have a kernel
+	 * with debugging info (called either kernel.full or kernel.debug).
+	 * If we have a debug kernel, use it.
+	 */
+	snprintf(path, sizeof(path), "%s/info.%s", crashdir, nr);
+	info = fopen(path, "r");
+	if (info == NULL) {
+		warn("%s", path);
+		return;
+	}
+	while (fgets(line, sizeof(line), info) != NULL) {
+		l = strlen(line);
+		if (l > 0 && line[l - 1] == '\n')
+			line[--l] = '\0';
+		if (strncmp(line, "    ", 4) == 0) {
+			fclose(info);
+			dir = strchr(line, ':');
+			dir = (dir == NULL) ? line + 4 : dir + 1;
+
+			/*
+			 * Check for kernel.full first as if it exists
+			 * kernel.debug will also exist, but will only
+			 * contain debug symbols and not be recognized
+			 * as a valid kernel by the osabi sniffer.
+			 */
+			snprintf(path, sizeof(path), "%s/kernel.full", dir);
+			if (stat(path, &st) == 0 && S_ISREG(st.st_mode)) {
+				kernel = strdup(path);
+				return;
+			}
+			snprintf(path, sizeof(path), "%s/kernel.debug", dir);
+			if (stat(path, &st) == 0 && S_ISREG(st.st_mode)) {
+				kernel = strdup(path);
+				return;
+			}
+			snprintf(path, sizeof(path), "%s/kernel", dir);
+			if (stat(path, &st) == 0 && S_ISREG(st.st_mode)) {
+				kernel = strdup(path);
+				return;
+			}
+			return;
+		}
+	}
+	fclose(info);
+}
+
+/*
+ * Remote targets can support any number of syntaxes and we want to
+ * support them all with one addition: we support specifying a device
+ * node for a serial device without the "/dev/" prefix.
+ *
+ * What we do is to stat(2) the existing remote target first.  If that
+ * fails, we try it with "/dev/" prepended.  If that succeeds we use
+ * the resulting path, otherwise we use the original target.  If
+ * either stat(2) succeeds make sure the file is either a character
+ * device or a FIFO.
+ */
+static void
+verify_remote(void)
+{
+	char path[PATH_MAX];
+	struct stat st;
+
+	if (stat(remote, &st) != 0) {
+		snprintf(path, sizeof(path), "/dev/%s", remote);
+		if (stat(path, &st) != 0)
+			return;
+		free(remote);
+		remote = strdup(path);
+	}
+	if (!S_ISCHR(st.st_mode) && !S_ISFIFO(st.st_mode))
+		errx(1, "%s: not a special file, FIFO or socket", remote);
+}
+
+static void
+add_arg(struct captured_main_args *args, char const *arg)
+{
+
+	args->argc++;
+	args->argv = (char **)reallocf(args->argv, (args->argc + 1) *
+	    sizeof(char *));
+	if (args->argv == NULL)
+		err(1, "Out of memory building argument list");
+	args->argv[args->argc] = (char *)arg;
+}
+
+int
+main(int argc, char *argv[])
+{
+	char path[PATH_MAX];
+	struct stat st;
+	struct captured_main_args args;
+	char *s;
+	int a, ch, writeable;
+
+	dumpnr = NULL;
+	writeable = 0;
+
+	strlcpy(crashdir, "/var/crash", sizeof(crashdir));
+	s = getenv("KGDB_CRASH_DIR");
+	if (s != NULL)
+		strlcpy(crashdir, s, sizeof(crashdir));
+
+	/* Convert long options into short options. */
+	for (a = 1; a < argc; a++) {
+		s = argv[a];
+		if (s[0] == '-') {
+			s++;
+			/* Long options take either 1 or 2 dashes. */
+			if (s[0] == '-')
+				s++;
+			if (strcmp(s, "quiet") == 0)
+				argv[a] = (char *)"-q";
+			else if (strcmp(s, "fullname") == 0)
+				argv[a] = (char *)"-f";
+            else if (strcmp(s, "batch") == 0)
+                argv[a] = (char *)"-B";
+            else if (strcmp(s, "interpreter") == 0)
+                argv[a] = (char *)"-N";
+		}
+	}
+
+	kgdb_quiet = 0;
+	memset (&args, 0, sizeof args);
+	args.interpreter_p = INTERP_CONSOLE;
+	args.argv = (char **)xmalloc(sizeof(char *));
+	args.argv[0] = argv[0];
+
+	while ((ch = getopt(argc, argv, "aBb:c:d:fN:n:qr:vwx:Vh")) != -1) {
+		switch (ch) {
+		case 'a':
+			annotation_level++;
+			break;
+        case 'B':
+            kgdb_quiet = 1;
+            add_arg(&args, "-batch");
+            break;
+		case 'b': {
+			int i;
+			char *p;
+
+			i = strtol(optarg, &p, 0);
+			if (*p != '\0' || p == optarg)
+				warnx("warning: could not set baud rate to `%s'.\n",
+				    optarg);
+			else
+				baud_rate = i;
+			break;
+		}
+		case 'c':	/* use given core file. */
+			if (vmcore != NULL) {
+				warnx("option %c: can only be specified once",
+				    optopt);
+				usage();
+                exit(1);
+				/* NOTREACHED */
+			}
+			vmcore = strdup(optarg);
+			break;
+		case 'd':	/* lookup dumps in given directory. */
+			strlcpy(crashdir, optarg, sizeof(crashdir));
+			break;
+		case 'f':
+			annotation_level = 1;
+			break;
+        case 'h':
+            usage();
+            exit(0);
+            /* NOTREACHED */
+            break;
+        case 'N':
+            interpr = strdup(optarg);
+            add_arg(&args, "-interpreter");
+            add_arg(&args, interpr);
+            break;
+		case 'n':	/* use dump with given number. */
+			dumpnr = optarg;
+			break;
+		case 'q':
+			kgdb_quiet = 1;
+			add_arg(&args, "-q");
+			break;
+		case 'r':	/* use given device for remote session. */
+			if (remote != NULL) {
+				warnx("option %c: can only be specified once",
+				    optopt);
+				usage();
+                exit(1);
+				/* NOTREACHED */
+			}
+			remote = strdup(optarg);
+			break;
+		case 'v':	/* increase verbosity. */
+			verbose++;
+			break;
+        case 'V':       /* Enable gdb jverbose */
+            add_arg(&args, "-jverbose");
+            break;
+		case 'w':	/* core file is writeable. */
+			writeable = 1;
+			break;
+		case 'x':	/* use given command file. */
+			if (command_file != NULL) {
+				warnx("option %c: can only be specified once",
+				    optopt);
+				usage();
+                exit(1);
+				/* NOTREACHED */
+			}
+			command_file = strdup(optarg);
+			add_arg(&args, "-x");
+			add_arg(&args, command_file);
+			break;
+		case '?':
+		default:
+			usage();
+            exit(1);
+		}
+	}
+
+	if (((vmcore != NULL) ? 1 : 0) + ((dumpnr != NULL) ? 1 : 0) +
+	    ((remote != NULL) ? 1 : 0) > 1) {
+		warnx("options -c, -n and -r are mutually exclusive");
+		usage();
+        exit(1);
+		/* NOTREACHED */
+	}
+
+	if (verbose > 1)
+		warnx("using %s as the crash directory", crashdir);
+
+	if (argc > optind)
+		kernel = strdup(argv[optind++]);
+
+	if (argc > optind && (dumpnr != NULL || remote != NULL)) {
+		warnx("options -n and -r do not take a core file. Ignored");
+		optind = argc;
+	}
+
+	if (dumpnr != NULL) {
+		snprintf(path, sizeof(path), "%s/vmcore.%s", crashdir, dumpnr);
+		if (stat(path, &st) == -1)
+			err(1, "%s", path);
+		if (!S_ISREG(st.st_mode))
+			errx(1, "%s: not a regular file", path);
+		vmcore = strdup(path);
+	} else if (remote != NULL) {
+		verify_remote();
+	} else if (argc > optind) {
+		if (vmcore == NULL)
+			vmcore = strdup(argv[optind++]);
+		if (argc > optind)
+			warnx("multiple core files specified. Ignored");
+	}
+#ifdef __FreeBSD__
+    else if (vmcore == NULL && kernel == NULL) {
+		vmcore = strdup(_PATH_MEM);
+		kernel = strdup(getbootfile());
+	}
+#endif /* __FreeBSD__ */
+	if (verbose) {
+		if (vmcore != NULL)
+			warnx("core file: %s", vmcore);
+		if (remote != NULL)
+			warnx("device file: %s", remote);
+		if (kernel != NULL)
+			warnx("kernel image: %s", kernel);
+	}
+
+	/* A remote target requires an explicit kernel argument. */
+	if (remote != NULL && kernel == NULL) {
+		warnx("remote debugging requires a kernel");
+		usage();
+        exit(1);
+		/* NOTREACHED */
+	}
+
+	/* If we don't have a kernel image yet, try to find one. */
+	if (kernel == NULL) {
+#ifdef __FreeBSD__
+		if (dumpnr != NULL)
+			kernel_from_dumpnr(dumpnr);
+
+		if (kernel == NULL)
+			errx(1, "couldn't find a suitable kernel image");
+		if (verbose)
+			warnx("kernel image: %s", kernel);
+#else
+		warnx("need a kernel image to debug");
+		usage();
+		exit(1);
+#endif /* __FreeBSD__ */
+	}
+
+	/* Set an alternate prompt. */
+	add_arg(&args, "-iex");
+	add_arg(&args, "set prompt (kgdb) ");
+
+	/* Change osabi to assume a FreeBSD kernel. */
+	add_arg(&args, "-iex");
+	add_arg(&args, "set osabi FreeBSD/kernel");
+
+	/* Change default remote timeout for junos live debugging. */
+	add_arg(&args, "-iex");
+	add_arg(&args, "set remotetimeout 5");
+
+	/* Open the vmcore if requested. */
+	if (vmcore != NULL) {
+		add_arg(&args, "-ex");
+		if (asprintf(&s, "target vmcore %s%s", writeable ? "-w " : "",
+		    vmcore) < 0)
+			err(1, "couldn't build command line");
+		add_arg(&args, s);
+	}
+
+	/* Open the remote target if requested. */
+	if (remote != NULL) {
+		add_arg(&args, "-ex");
+		if (asprintf(&s, "target remote %s", remote) < 0)
+			err(1, "couldn't build command line");
+		add_arg(&args, s);
+	}
+
+	add_arg(&args, kernel);
+
+	/* The libgdb code uses optind too. Reset it... */
+	optind = 0;
+
+	/* Terminate argv list. */
+	add_arg(&args, NULL);
+
+	extern void initialize_all_kgdb_files(void);
+	initialize_all_kgdb_files();
+
+	return (gdb_main(&args));
+}
+
+ps_err_e __attribute__ ((weak))
+ps_pglobal_lookup(struct ps_prochandle *ph, const char *obj,
+		  const char *name, uint64_t *sym_addr)
+{
+  struct bound_minimal_symbol ms;
+
+  ms = lookup_minimal_symbol (name, NULL, NULL);
+  if (ms.minsym == NULL)
+    return PS_NOSYM;
+
+  *sym_addr = ms.value_address ();
+  return PS_OK;
+}
