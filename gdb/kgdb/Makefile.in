@@ -107,6 +107,7 @@ LIBIBERTY = ../../libiberty/libiberty.a
 LIBCTF = ../../libctf/.libs/libctf.a
 LIBGDBSUPPORT = ../../gdbsupport/libgdbsupport.a
 LIBBACKTRACE = ../../libbacktrace/.libs/libbacktrace.a
+LIBSFRAME = ../../libsframe/.libs/libsframe.a
 
 # Generated headers in the gnulib directory.  These must be listed
 # so that they are generated before other files are compiled.
@@ -139,7 +140,7 @@ GDBLIB_BUILDDIR = ..
 LIBGDB = $(GDBLIB_BUILDDIR)/libgdb.a
 
 CDEPS = $(LIBGNU) $(BFD)
-CLIBS = -Wl,--start-group $(LIBGNU) $(BFD) $(LIBOPCODES) $(LIBREADLINE) $(LIBDECNUMBER) $(LIBIBERTY) $(LIBCTF) $(LIBZ) $(LIBGDBSUPPORT) $(LIBBACKTRACE) -Wl,--end-group
+CLIBS = -Wl,--start-group $(LIBGNU) $(BFD) $(LIBOPCODES) $(LIBREADLINE) $(LIBDECNUMBER) $(LIBIBERTY) $(LIBCTF) $(LIBZ) $(LIBGDBSUPPORT) $(LIBBACKTRACE) $(LIBSFRAME) -Wl,--end-group
 
 KGDB_HOST_LDFLAGS = @KGDB_HOST_LDFLAGS@
 
