@@ -430,7 +430,7 @@ main(int argc, char *argv[])
 
 	/* Change default remote timeout for junos live debugging. */
 	add_arg(&args, "-iex");
-	add_arg(&args, "set remotetimeout 5");
+	add_arg(&args, "set remotetimeout 15");
 
 	/* Open the vmcore if requested. */
 	if (vmcore != NULL) {
