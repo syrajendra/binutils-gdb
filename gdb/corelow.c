@@ -373,6 +373,7 @@ add_to_thread_list (asection *asect, asection *reg_sect, inferior *inf)
 
   int lwpid = atoi (bfd_section_name (asect) + 5);
   ptid_t ptid (inf->pid, lwpid);
+  JPRINTF("Core section '%s' lwpid %d \n", bfd_section_name (asect), lwpid);
   thread_info *thr = add_thread (inf->process_target (), ptid);
 
   /* Warning, Will Robinson, looking at BFD private data! */
@@ -635,6 +636,7 @@ core_target_open (const char *arg, int from_tty)
   if (scratch_chan < 0)
     perror_with_name (filename.get ());
 
+  JPRINTF("Open core file '%s'\n", filename.get ());
   gdb_bfd_ref_ptr temp_bfd (gdb_bfd_fopen (filename.get (), gnutarget,
 					   write_files ? FOPEN_RUB : FOPEN_RB,
 					   scratch_chan));
