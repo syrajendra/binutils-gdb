@@ -34,7 +34,7 @@ set target_binfile [gdb_remote_download target $binfile]
 set host_binfile [gdb_remote_download host $binfile]
 
 # Start gdbserver.
-set res [gdbserver_spawn "${target_binfile}"]
+set res [_gdbserver_spawn "${target_binfile}"]
 set gdbserver_protocol [lindex $res 0]
 set gdbserver_gdbport [lindex $res 1]
 set gdbserver_pid [exp_pid -i $server_spawn_id]

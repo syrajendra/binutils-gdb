@@ -70,7 +70,7 @@
 load_lib gdbserver-support.exp
 
 proc gdbserver_gdb_load { } {
-    return [gdbserver_spawn ""]
+    return [_gdbserver_spawn ""]
 }
 
 proc gdb_reload { {inferior_args {}} } {

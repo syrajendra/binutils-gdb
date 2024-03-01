@@ -46,7 +46,7 @@ save_vars { GDBFLAGS } {
 gdb_test "disconnect" ".*"
 
 # Start gdbserver.
-set res [gdbserver_spawn "${binfile}"]
+set res [_gdbserver_spawn "${binfile}"]
 set gdbserver_protocol [lindex $res 0]
 set gdbserver_gdbport [lindex $res 1]
 set gdbserver_pid [exp_pid -i $server_spawn_id]
