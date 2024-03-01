@@ -30,6 +30,11 @@
 # Otherwise, if GDB doesn't kill the grandchild, then the pipe read
 # never returns and the test times out.
 
+if { [istarget "*-*-*freebsd*"] && [target_info gdb_protocol] == "remote" } {
+    unsupported "freebsd remote setup doesn't support catchpoints"
+    return -1
+}
+
 standard_testfile
 
 # Build two programs -- one for fork, and another for vfork.

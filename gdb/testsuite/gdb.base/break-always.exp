@@ -59,6 +59,9 @@ gdb_test_multiple "break bar" $test {
     }
 }
 
+# Run to breakpoint.
+gdb_continue_to_breakpoint "bar" ".*break-always.c:$bar_location.*"
+
 # Save the original INSN under the breakpoint.
 gdb_test "p /x \$shadow = *(char *) $bp_address" \
     " = $hex" \
@@ -93,5 +96,3 @@ foreach test_value {0 1} {
 gdb_test "p /x *(char *) $bp_address = \$shadow" "" \
     "restore the original contents"
 
-# Run to breakpoint.
-gdb_continue_to_breakpoint "bar" ".*break-always.c:$bar_location.*"

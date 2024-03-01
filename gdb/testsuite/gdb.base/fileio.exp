@@ -17,6 +17,12 @@
 
 require {!target_info exists gdb,nofileio}
 
+if { [target_info gdb_protocol] == "remote" } {
+    verbose "Skipping fileio.exp because of no fileio capabilities for remote target."
+    unsupported "skipped all tests"
+    return
+}
+
 standard_testfile
 
 if {[is_remote host]} {

@@ -92,7 +92,7 @@ set single_reg_xml [gdb_remote_download host  \
 
 if {[string equal ${core-regs} ""]} {
     gdb_test "set tdesc file $single_reg_xml" \
-	"warning: Target-supplied registers are not supported.*" \
+	"warning: Target-supplied registers are not supported.*|warning: Architecture rejected target-supplied description.*" \
 	"set tdesc file single-reg.xml"
     unsupported "register tests"
     return 0

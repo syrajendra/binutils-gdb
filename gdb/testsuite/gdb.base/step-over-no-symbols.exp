@@ -16,6 +16,11 @@
 # Test that GDB can step past a breakpoint even if GDB doesn't have
 # symbols for the main binary.  PR gdb/13858.
 
+if { [istarget "*-*-*freebsd*"] && [target_info gdb_protocol] == "remote" } {
+    unsupported "purging symbols and displaced-stepping not supported"
+    return -1
+}
+
 standard_testfile start.c
 
 if { [build_executable "failed to build" ${testfile} $srcfile] } {

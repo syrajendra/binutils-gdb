@@ -19,6 +19,10 @@ load_lib gdb-python.exp
 
 standard_testfile
 
+if { [test_compiler_info clang*] } {
+    lappend options "additional_flags=-fdebug-macro"
+}
+
 # Compile the test executable.
 if {[build_executable "failed to build" $testfile $srcfile {debug macros}]} {
     return -1
